@@ -1,0 +1,6 @@
+cement
+httplib2
+python-Levenshtein
+google-api-python-client
+pyxdg
+python-dateutil
