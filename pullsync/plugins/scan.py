@@ -1,7 +1,10 @@
 import json
 import os
 import re
+import time
 
+import apiclient
+from apiclient.discovery import build
 from cement.core import controller, handler
 from dateutil.parser import parse as parse_date
 from Levenshtein import distance
@@ -11,6 +14,19 @@ class ScanController(controller.CementBaseController):
         label = 'scan'
         stacked_on = 'base'
         stacked_type = 'nested'
+
+    @controller.expose(aliases=['help'], aliases_only=True)
+    def default(self):
+        self.app.args.print_help()
+
+
+class ScanLocal(controller.CementBaseController):
+    class Meta:
+        label = 'scan_local'
+        stacked_on = 'scan'
+        stacked_type = 'nested'
+        aliases = ['local']
+        aliases_only=True
         arguments = [
             (['--newlist'], {
                 'help': 'load new entries from file rather than remote api',
@@ -55,7 +71,8 @@ class ScanController(controller.CementBaseController):
             # a small distance can indicate a large difference between
             # strings, so I weight the distance by string length to
             # try and counter this
-            min_length = min([len(normalised), len(candidate_name)])
+            min_length = abs(
+                min([len(normalised), len(candidate_name), -1]))
             name_distance = distance(unicode(candidate[0]), unicode(normalised))
             weighted_distance = float(name_distance)/min_length
             yield (
@@ -85,25 +102,30 @@ class ScanController(controller.CementBaseController):
     def default(self):
         pulldb = handler.get('readinglist', 'pulldb')()
         pulldb._setup(self.app)
-        new_items = pulldb.list_new(self.app.pargs.newlist)
+        new_items = pulldb.list_unread()
         pulls = new_items['results']
         candidates = []
         if self.app.pargs.scandir:
             candidates = list(self.scan_dir(self.app.pargs.scandir))
         elif self.app.pargs.scanfile:
             candidates = list(self.scan_file(self.app.pargs.scanfile))
+        match_cache = []
         for pull in pulls:
             matches = [
                 match for match in self.compare_pull(pull, candidates)
             ]
-            best_match = min(matches)
-            print '#%8s - %s (%0.4f)' % (pull['issue']['identifier'],
-                                         pull['issue']['name'],
+            match_cache.append([pull, matches])
+            if matches:
+                best_match = min(matches)
+            else:
+                continue
+            print '#%8s - %s (%0.4f)' % (pull['pull']['identifier'],
+                                         pull['pull']['name'],
                                          best_match[1],
                                      )
             if best_match[1] < 0.8 and not best_match[0]:
                 source_file = os.path.join(best_match[2][1], best_match[2][2])
-                issue_id = int(pull['issue']['identifier'])
+                issue_id = int(pull['pull']['identifier'])
                 issue_path = os.path.join(
                     '%2x' % (issue_id & 0xff,),
                     '%2x' % ((issue_id & 0xff00) >> 8,),
@@ -120,6 +142,72 @@ class ScanController(controller.CementBaseController):
                 print '# %r' % (best_match[0:2],)
                 print '# %s' % best_match[2][2]
             print
+        with open('match_cache.json', 'w') as cache_file:
+            json.dump(match_cache, cache_file)
+
+def with_backoff(original_function):
+    def retry_with_backoff(*args, **kwargs):
+        backoff = 0.1
+        attempt = 0
+        while True:
+            try:
+                return original_function(*args, **kwargs)
+            except apiclient.errors.HttpError:
+                if attempt < 5:
+                    sleep(2**attempt * backoff)
+                else:
+                    raise
+
+    return retry_with_backoff
+
+class ScanRemote(controller.CementBaseController):
+    class Meta:
+        label = 'scan_remote'
+        stacked_on = 'scan'
+        stacked_type = 'nested'
+        aliases = ['remote']
+        aliases_only = True
+
+    @with_backoff
+    def check_files(self, gsclient, prefix):
+        request = gsclient.objects().list(bucket='long-box', prefix=prefix)
+        return request.execute()
+
+    @controller.expose()
+    def default(self):
+        oauth = handler.get('auth', 'oauth2')()
+        oauth._setup(self.app)
+        pulldb = handler.get('readinglist', 'pulldb')()
+        pulldb._setup(self.app)
+
+        http_client = oauth.client()
+
+        unread_items = pulldb.list_unread()
+
+        gsclient = build('storage', 'v1', http=http_client)
+
+        cache = []
+        for pull in unread_items['results']:
+            pull_id = int(pull['pull']['identifier'])
+            prefix = 'comics/%02x/%02x/%x' % (
+                pull_id & 0xff,
+                (pull_id & 0xff00) >> 8,
+                pull_id
+            )
+            pull_match = self.check_files(gsclient, prefix)
+            if 'items' in pull_match:
+                print 'File found for [%s] %s' % (
+                    pull['pull']['identifier'], pull['pull']['name'])
+                cache.append([pull, pull_match])
+                for item in pull_match['items']:
+                    print item['mediaLink']
+            else:
+                print 'No match for %s' % pull['pull']['identifier']
+        with open('cache.json', 'w') as cache_file:
+            json.dump(cache, cache_file)
+
 
 def load():
     handler.register(ScanController)
+    handler.register(ScanLocal)
+    handler.register(ScanRemote)
