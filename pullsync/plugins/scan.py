@@ -100,9 +100,7 @@ class ScanLocal(controller.CementBaseController):
 
     @controller.expose(hide=True)
     def default(self):
-        pulldb = handler.get('readinglist', 'pulldb')()
-        pulldb._setup(self.app)
-        new_items = pulldb.list_unread()
+        new_items = self.pulldb.list_unread()
         pulls = new_items['results']
         candidates = []
         if self.app.pargs.scandir:
@@ -169,43 +167,46 @@ class ScanRemote(controller.CementBaseController):
         aliases_only = True
 
     @with_backoff
-    def check_files(self, gsclient, prefix):
+    def check_prefix(self, gsclient, pull_id):
+        prefix = 'comics/%02x/%02x/%x' % (
+            pull_id & 0xff,
+            (pull_id & 0xff00) >> 8,
+            pull_id
+        )
+        if self.app.redis.client.sismember('gs:seen', pull_id):
+            file_detail = self.app.redis.client.get('gs:file:%d' % pull_id)
+            return json.loads(file_detail)
         request = gsclient.objects().list(bucket='long-box', prefix=prefix)
-        return request.execute()
+        response = request.execute()
+        if 'items' in response:
+            self.app.log.debug('Files found for prefix %s' % prefix)
+            file_list = response['items']
+            self.app.redis.client.sadd('gs:seen', pull_id)
+            self.app.redis.client.set(
+                'gs:file:%d' % pull_id, json.dumps(file_list))
+            return file_list
 
     @controller.expose()
     def default(self):
-        oauth = handler.get('auth', 'oauth2')()
-        oauth._setup(self.app)
-        pulldb = handler.get('readinglist', 'pulldb')()
-        pulldb._setup(self.app)
+        unread_items = self.app.pulldb.list_unread()
 
-        http_client = oauth.client()
-
-        unread_items = pulldb.list_unread()
-
-        gsclient = build('storage', 'v1', http=http_client)
+        gsclient = build('storage', 'v1', http=self.app.google.client)
 
         cache = []
-        for pull in unread_items['results']:
-            pull_id = int(pull['pull']['identifier'])
-            prefix = 'comics/%02x/%02x/%x' % (
-                pull_id & 0xff,
-                (pull_id & 0xff00) >> 8,
-                pull_id
-            )
-            pull_match = self.check_files(gsclient, prefix)
-            if 'items' in pull_match:
+        for pull in unread_items:
+            pull_detail = json.loads(self.app.redis.client.get(pull))
+            pull_id = int(pull_detail['id'])
+            pull_matches = self.check_prefix(gsclient, pull_id)
+            if pull_matches:
                 print 'File found for [%s] %s' % (
-                    pull['pull']['identifier'], pull['pull']['name'])
-                cache.append([pull, pull_match])
-                for item in pull_match['items']:
+                    pull_detail['identifier'], pull_detail['name'])
+                cache.append([pull, pull_matches])
+                for item in pull_matches:
                     print item['mediaLink']
             else:
-                print 'No match for %s' % pull['pull']['identifier']
+                print 'No match for %s' % pull_detail['identifier']
         with open('cache.json', 'w') as cache_file:
             json.dump(cache, cache_file)
-
 
 def load():
     handler.register(ScanController)

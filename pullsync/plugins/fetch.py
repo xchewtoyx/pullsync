@@ -12,9 +12,7 @@ class FetchPulls(controller.CementBaseController):
 
     @controller.expose(hide=True)
     def default(self):
-        pulldb = handler.get('readinglist', 'pulldb')()
-        pulldb._setup(self.app)
-        pulldb.fetch_unread()
+        self.pulldb.fetch_unread()
 
 def load():
     handler.register(FetchPulls)

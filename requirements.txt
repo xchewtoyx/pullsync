@@ -4,3 +4,5 @@ python-Levenshtein
 google-api-python-client
 pyxdg
 python-dateutil
+redis
+hiredis

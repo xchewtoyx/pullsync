@@ -6,8 +6,6 @@ from urllib import urlencode
 from cement.core import foundation, controller
 
 from pullsync import interfaces
-from pullsync import oauth
-from pullsync import pulldb
 
 class BaseController(controller.CementBaseController):
     class Meta:
@@ -18,11 +16,15 @@ class BaseController(controller.CementBaseController):
         self.app.args.print_help()
 
 def run():
-    app = foundation.CementApp(label='pullsync',
-                               base_controller=BaseController)
-    interfaces.load()
-    oauth.load()
-    pulldb.load()
+    app = foundation.CementApp(
+        label='pullsync', base_controller=BaseController,
+        extensions=[
+            'pullsync.ext.interfaces',
+            'pullsync.ext.pulldb',
+            'pullsync.ext.google',
+            'pullsync.ext.rediscache',
+        ]
+    )
     try:
         app.setup()
         app.run()

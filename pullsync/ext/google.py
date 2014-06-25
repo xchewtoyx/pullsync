@@ -9,17 +9,22 @@ from oauth2client import tools
 from oauth2client.multistore_file import get_credential_storage
 import xdg.BaseDirectory
 
-from pullsync.interfaces import AuthInterface
+from pullsync.ext.interfaces import AuthInterface
 
-class OauthHandler(handler.CementBaseHandler):
+class GoogleHandler(handler.CementBaseHandler):
     class Meta:
         interface = AuthInterface
-        label = 'oauth2'
+        label = 'google'
         scope = (
             'https://www.googleapis.com/auth/userinfo.email '
             'https://www.googleapis.com/auth/devstorage.read_write '
         )
         user_agent = 'pullsync/0.1'
+
+    def _setup(self, app):
+        app.log.info('Setting up google api client')
+        self.app = app
+        self.app.google = self
 
     @property
     def client_secrets(self):
@@ -42,6 +47,7 @@ class OauthHandler(handler.CementBaseHandler):
             self.Meta.scope
         )
 
+    @property
     def client(self):
         http_client = httplib2.Http()
         credentials = self.credential_store.get()
@@ -66,5 +72,7 @@ def load_google_args(app):
     app.args.set_defaults(noauth_local_webserver=True)
 
 def load():
-    handler.register(OauthHandler)
+    handler.register(GoogleHandler)
     hook.register('pre_argument_parsing', load_google_args)
+    google = GoogleHandler()
+    hook.register('post_setup', google._setup)
