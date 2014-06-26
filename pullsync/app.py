@@ -19,9 +19,11 @@ def run():
     app = foundation.CementApp(
         label='pullsync', base_controller=BaseController,
         extensions=[
+            # interfaces must go first
             'pullsync.ext.interfaces',
-            'pullsync.ext.pulldb',
             'pullsync.ext.google',
+            'pullsync.ext.longbox',
+            'pullsync.ext.pulldb',
             'pullsync.ext.rediscache',
         ]
     )
