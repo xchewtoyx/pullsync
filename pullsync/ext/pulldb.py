@@ -1,3 +1,4 @@
+from datetime import timedelta
 import json
 import os
 
@@ -5,15 +6,12 @@ from cement.core import controller, handler, hook
 from dateutil.parser import parse as parse_date
 import xdg
 
-from pullsync.ext.interfaces import ReadinglistInterface
-
 class FetchError(Exception):
     pass
 
 class PullDB(handler.CementBaseHandler):
     class Meta:
         label = 'pulldb'
-        interface = ReadinglistInterface
 
     def _setup(self, app):
         app.log.info('Setting up pulldb handler')
@@ -32,25 +30,6 @@ class PullDB(handler.CementBaseHandler):
             pulls.append((key, json.dumps(pull['pull'])))
         return pulls
 
-    def fetch_new(self, data_file=None):
-        if data_file:
-            with open(data_file, 'r') as source:
-                response = json.load(source)
-        else:
-            path = '/api/pulls/list/new'
-            resp, content = self.app.google.client.request(self.base_url + path)
-            if resp.status != 200:
-                self.app.log.error(resp, content)
-                raise FetchError('Unable to fetch new pulls')
-            else:
-                with open(self.new_file, 'w') as new_pulls:
-                    unread_pulls.write(content)
-                result = json.loads(content)
-                self.app.redis.multi_set(
-                    self.extract_pulls(result),
-                    ttl=86400,
-                )
-
     def fetch_unread(self):
         path = '/api/pulls/list/unread'
         resp, content = self.app.google.client.request(self.base_url + path)
@@ -63,7 +42,7 @@ class PullDB(handler.CementBaseHandler):
             result = json.loads(content)
             self.app.redis.multi_set(
                 self.extract_pulls(result),
-                ttl=86400,
+                ttl=timedelta(1),
             )
 
     def list_unread(self):
@@ -80,7 +59,6 @@ class FetchPulls(controller.CementBaseController):
         self.app.pulldb.fetch_unread()
 
 def load():
-    handler.register(PullDB)
     handler.register(FetchPulls)
     pulldb = PullDB()
     hook.register('post_setup', pulldb._setup)

@@ -1,3 +1,4 @@
+from datetime import timedelta
 import json
 import os
 import re
@@ -21,7 +22,6 @@ def with_backoff(original_function):
                     sleep(2**attempt * backoff)
                 else:
                     raise
-
     return retry_with_backoff
 
 class Longbox(controller.CementBaseController):
@@ -30,28 +30,38 @@ class Longbox(controller.CementBaseController):
 
     def _setup(self, app):
         self.app = app
-        self.app.log.info('Setting up longbox interface')
+        self.app.log.debug('Setting up longbox interface')
         self.app.longbox = self
+
+    def file_detail(self, pull_id):
+        if self.app.redis.client.sismember('gs:seen', pull_id):
+            file_detail = self.app.redis.client.get('gs:file:%d' % pull_id)
+            if not file_detail:
+                self.app.redis.client.srem('gs:seen', pull_id)
+            else:
+                return json.loads(file_detail)
 
     @with_backoff
     def check_prefix(self, gsclient, pull_id):
+        file_detail = None
         prefix = 'comics/%02x/%02x/%x' % (
             pull_id & 0xff,
             (pull_id & 0xff00) >> 8,
             pull_id
         )
-        if self.app.redis.client.sismember('gs:seen', pull_id):
-            file_detail = self.app.redis.client.get('gs:file:%d' % pull_id)
-            return json.loads(file_detail)
-        request = gsclient.objects().list(bucket='long-box', prefix=prefix)
-        response = request.execute()
-        if 'items' in response:
-            self.app.log.debug('Files found for prefix %s' % prefix)
-            file_list = response['items']
-            self.app.redis.client.sadd('gs:seen', pull_id)
-            self.app.redis.client.set(
-                'gs:file:%d' % pull_id, json.dumps(file_list))
-            return file_list
+        file_detail = self.file_detail(pull_id)
+        if not file_detail:
+            request = gsclient.objects().list(bucket='long-box', prefix=prefix)
+            response = request.execute()
+            if 'items' in response:
+                self.app.log.debug('Files found for prefix %s' % prefix)
+                file_detail = response['items']
+                self.app.redis.client.sadd('gs:seen', pull_id)
+                self.app.redis.client.setex(
+                    'gs:file:%d' % pull_id, json.dumps(file_detail),
+                    timedelta(7),
+                )
+        return file_detail
 
     def scan(self):
         unread_items = self.app.pulldb.list_unread()
