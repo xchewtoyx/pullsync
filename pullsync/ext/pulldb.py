@@ -48,6 +48,19 @@ class PullDB(handler.CementBaseHandler):
     def list_unread(self):
         return self.app.redis.client.keys('pull:*')
 
+    def refresh_pull(self, pull_id):
+        path = '/api/pulls/%d/get' % pull_id
+        resp, content = self.app.google.client.request(self.base_url + path)
+        if resp.status != 200:
+            self.app.log.error(resp, content)
+            raise FetchError('Unable to fetch pull %d' % pull_id)
+        else:
+            response = json.loads(content)
+            for pull in response['results']:
+                key = '%s:%s' % (prefix, pull['pull']['id'])
+                self.app.redis.setex(json.dumps(pull['pull']), timedelta(1))
+                return pull['pull']
+
 class FetchPulls(controller.CementBaseController):
     class Meta:
         label = 'fetch'
