@@ -20,7 +20,7 @@ def with_backoff(original_function):
                 return original_function(*args, **kwargs)
             except apiclient.errors.HttpError:
                 if attempt < 5:
-                    sleep(2**attempt * backoff)
+                    time.sleep(2**attempt * backoff)
                 else:
                     raise
     return retry_with_backoff
@@ -109,17 +109,6 @@ class Longbox(controller.CementBaseController):
                 print 'No match for %s' % pull_detail['identifier']
         with open('cache.json', 'w') as cache_file:
             json.dump(cache, cache_file)
-
-        for filename in os.listdir(self.app.pargs.destination):
-            if filename.endswith(['.cbr', '.cbz']):
-                pull_id, file_type = filename.rsplit('.', 2)
-                try:
-                    pull_id = int(pull_id, 16)
-                except ValueError:
-                    continue
-                if not self.app.redis.exists('pull:%d' % pull_id):
-                    self.app.log.debug('Removing old pull %r' % filename)
-                    os.unlink(filename)
 
 class ScanController(controller.CementBaseController):
     class Meta:

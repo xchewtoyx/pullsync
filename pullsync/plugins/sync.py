@@ -101,5 +101,16 @@ class SyncController(controller.CementBaseController):
                 continue
             self.app.longbox.fetch_file(source, destination)
 
+        for filename in os.listdir(self.app.pargs.destination):
+            if filename.endswith(('.cbr', '.cbz')):
+                pull_id, file_type = filename.rsplit('.', 2)
+                try:
+                    pull_id = int(pull_id, 16)
+                except ValueError:
+                    continue
+                if not self.app.redis.exists('pull:%d' % pull_id):
+                    self.app.log.debug('Removing old pull %r' % filename)
+                    os.unlink(os.path.join(self.app.pargs.destination, filename))
+
 def load():
     handler.register(SyncController)

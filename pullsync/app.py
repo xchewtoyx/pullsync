@@ -5,8 +5,6 @@ from urllib import urlencode
 
 from cement.core import foundation, controller
 
-from pullsync import interfaces
-
 class BaseController(controller.CementBaseController):
     class Meta:
         label = 'base'
