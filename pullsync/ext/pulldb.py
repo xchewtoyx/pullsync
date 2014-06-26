@@ -48,7 +48,7 @@ class PullDB(handler.CementBaseHandler):
     def list_unread(self):
         return self.app.redis.client.keys('pull:*')
 
-    def refresh_pull(self, pull_id):
+    def refresh_pull(self, pull_id, prefix='pull'):
         path = '/api/pulls/%d/get' % pull_id
         resp, content = self.app.google.client.request(self.base_url + path)
         if resp.status != 200:
@@ -58,7 +58,13 @@ class PullDB(handler.CementBaseHandler):
             response = json.loads(content)
             for pull in response['results']:
                 key = '%s:%s' % (prefix, pull['pull']['id'])
-                self.app.redis.setex(json.dumps(pull['pull']), timedelta(1))
+                if pull['pull']['read'] == 'True':
+                    # Only cache read pulls for 30s
+                    ttl = 30
+                else:
+                    ttl = timedelta(1)
+                self.app.redis.setex(
+                    key, ttl, json.dumps(pull['pull']))
                 return pull['pull']
 
 class FetchPulls(controller.CementBaseController):

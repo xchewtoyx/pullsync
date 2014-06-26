@@ -1,4 +1,5 @@
 from datetime import timedelta
+import io
 import json
 import os
 import re
@@ -64,6 +65,30 @@ class Longbox(controller.CementBaseController):
                 )
         return file_detail
 
+    def fetch_file(self, item_detail, destination):
+        gsclient = build('storage', 'v1', http=self.app.google.client)
+        # Get Payload Data
+        req = gsclient.objects().get_media(
+            bucket=item_detail['bucket'],
+            object=item_detail['name'],
+        )
+
+        # The BytesIO object may be replaced with any io.Base instance.
+        fh = io.FileIO(destination, 'w')
+        downloader = apiclient.http.MediaIoBaseDownload(
+            fh, req, chunksize=1024*1024)
+        done = False
+        print
+        try:
+            while not done:
+                status, done = downloader.next_chunk()
+                if status:
+                    print '\rDownload %02d%%.' % int(status.progress() * 100)
+        except apiclient.errors.HttpError as error:
+            self.app.log.error('Error downloading file: %r' % error)
+            os.unlink(destination)
+        print 'Download Complete!'
+
     def scan(self):
         unread_items = self.app.pulldb.list_unread()
 
@@ -84,6 +109,17 @@ class Longbox(controller.CementBaseController):
                 print 'No match for %s' % pull_detail['identifier']
         with open('cache.json', 'w') as cache_file:
             json.dump(cache, cache_file)
+
+        for filename in os.listdir(self.app.pargs.destination):
+            if filename.endswith(['.cbr', '.cbz']):
+                pull_id, file_type = filename.rsplit('.', 2)
+                try:
+                    pull_id = int(pull_id, 16)
+                except ValueError:
+                    continue
+                if not self.app.redis.exists('pull:%d' % pull_id):
+                    self.app.log.debug('Removing old pull %r' % filename)
+                    os.unlink(filename)
 
 class ScanController(controller.CementBaseController):
     class Meta:

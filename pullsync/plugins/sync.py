@@ -78,6 +78,28 @@ class SyncController(controller.CementBaseController):
                 int(float(pull['weight'])*1e6),
                 pull['name'],
             )
+            items = json.loads(self.app.redis.get('gs:file:%d' % pull_id))
+            source = None
+            for item in items:
+                if item['contentType'] == 'application/x-cbr':
+                    file_type = 'cbr'
+                    source = item
+                elif item['contentType'] == 'application/x-cbz':
+                    file_type = 'cbz'
+                    source = item
+            if not source:
+                raise ValueError(
+                    'Cannot find file of supported type: %r' % items)
+            destination = os.path.join(
+                self.app.pargs.destination,
+                '%06x.%s' % (pull_id, file_type)
+            )
+            if os.path.exists(destination):
+                self.app.log.info(
+                    'Skipping file %r.  Already present in destination.' % (
+                        source['name']))
+                continue
+            self.app.longbox.fetch_file(source, destination)
 
 def load():
     handler.register(SyncController)
