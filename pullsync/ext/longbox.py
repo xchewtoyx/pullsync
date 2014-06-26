@@ -58,8 +58,9 @@ class Longbox(controller.CementBaseController):
                 file_detail = response['items']
                 self.app.redis.client.sadd('gs:seen', pull_id)
                 self.app.redis.client.setex(
-                    'gs:file:%d' % pull_id, json.dumps(file_detail),
+                    'gs:file:%d' % pull_id,
                     timedelta(7),
+                    json.dumps(file_detail),
                 )
         return file_detail
 
