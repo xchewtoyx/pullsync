@@ -78,16 +78,16 @@ class Longbox(controller.CementBaseController):
         downloader = apiclient.http.MediaIoBaseDownload(
             fh, req, chunksize=1024*1024)
         done = False
-        print
         try:
             while not done:
                 status, done = downloader.next_chunk()
                 if status:
-                    print '\rDownload %02d%%.' % int(status.progress() * 100)
+                    self.app.log.debug(
+                        'Download %02d%%.' % int(status.progress() * 100)
+                    )
         except apiclient.errors.HttpError as error:
             self.app.log.error('Error downloading file: %r' % error)
             os.unlink(destination)
-        print 'Download Complete!'
 
     def scan(self):
         unread_items = self.app.pulldb.list_unread()
@@ -100,15 +100,15 @@ class Longbox(controller.CementBaseController):
             pull_id = int(pull_detail['id'])
             pull_matches = self.check_prefix(gsclient, pull_id)
             if pull_matches:
-                print 'File found for [%s] %s' % (
-                    pull_detail['identifier'], pull_detail['name'])
+                self.app.log.debug('File found for [%s] %s' % (
+                    pull_detail['identifier'], pull_detail['name']))
                 cache.append([pull, pull_matches])
                 for item in pull_matches:
                     print item['mediaLink']
             else:
-                print 'No match for %s' % pull_detail['identifier']
-        with open('cache.json', 'w') as cache_file:
-            json.dump(cache, cache_file)
+                self.app.log.debug('No match for %s' % (
+                    pull_detail['identifier'],)
+                )
 
 class ScanController(controller.CementBaseController):
     class Meta:

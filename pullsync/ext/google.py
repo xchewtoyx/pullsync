@@ -22,7 +22,7 @@ class GoogleHandler(handler.CementBaseHandler):
         user_agent = 'pullsync/0.1'
 
     def _setup(self, app):
-        app.log.info('Setting up google api client')
+        app.log.debug('Setting up google api client')
         self.app = app
         self.app.google = self
 

@@ -14,7 +14,7 @@ class PullDB(handler.CementBaseHandler):
         label = 'pulldb'
 
     def _setup(self, app):
-        app.log.info('Setting up pulldb handler')
+        app.log.debug('Setting up pulldb handler')
         self.app = app
         self.app.pulldb = self
         self.base_url = self.app.config.get('pulldb', 'base_url')
