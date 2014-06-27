@@ -100,7 +100,7 @@ class UploadController(controller.CementBaseController):
             candidate[1], candidate[2]
         )
         pull_id = int(pull['identifier'])
-        destination = 'gs://long-box/comics/%2x/%2x/%x' % (
+        destination = 'gs://long-box/comics/%2x/%2x/%x/' % (
             pull_id & 0xff,
             (pull_id & 0xff00) >> 8,
             pull_id,
