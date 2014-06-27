@@ -70,8 +70,30 @@ class SyncController(controller.CementBaseController):
             yield pull_detail
             count = count + 1
 
+    def expire_pulls(self, directory, expired_pulls):
+        for filename in os.listdir(self.app.pargs.destination):
+            if filename.endswith(('.cbr', '.cbz')):
+                for expired_id in expired_pulls:
+                    if expired_id in filename:
+                        self.app.log.debug('Removing old pull %r' % filename)
+                        os.unlink(os.path.join(
+                            self.app.pargs.destination, filename))
+
+    def identify_pulls(self, directory):
+        for path in os.listdir(directory):
+            match = re.search(r'\b([a-z0-9]{6})\b')
+            if match:
+                file_id = match.group(1)
+                try:
+                    if int(file_id, 16):
+                        yield match
+                except ValueError:
+                    pass
+
     @controller.expose(hide=True)
     def default(self):
+        existing_pulls = set(self.identify_pulls(self.app.pargs.destination))
+        sync_pulls = set()
         for pull in self.exportable_items():
             pull_id = int(pull['identifier'])
             print '%06d %s' % (
@@ -90,27 +112,22 @@ class SyncController(controller.CementBaseController):
             if not source:
                 raise ValueError(
                     'Cannot find file of supported type: %r' % items)
+            sync_pulls.add(pull['identifier'])
             destination = os.path.join(
                 self.app.pargs.destination,
-                '%06x.%s' % (pull_id, file_type)
+                '%s[%06x].%s' % (pull['name'], pull_id, file_type)
             )
-            if os.path.exists(destination):
+            if pull['identifier'] in existing_pulls:
                 self.app.log.info(
                     'Skipping file %r.  Already present in destination.' % (
                         source['name']))
                 continue
             self.app.longbox.fetch_file(source, destination)
 
-        for filename in os.listdir(self.app.pargs.destination):
-            if filename.endswith(('.cbr', '.cbz')):
-                pull_id, file_type = filename.rsplit('.', 2)
-                try:
-                    pull_id = int(pull_id, 16)
-                except ValueError:
-                    continue
-                if not self.app.redis.exists('pull:%d' % pull_id):
-                    self.app.log.debug('Removing old pull %r' % filename)
-                    os.unlink(os.path.join(self.app.pargs.destination, filename))
+        expired_pulls = existing_pulls - sync_pulls
+
+        if expired_pulls:
+            self.expire_pulls(self.app.pargs.destination, expired_pulls)
 
 def load():
     handler.register(SyncController)
