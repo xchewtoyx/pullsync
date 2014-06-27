@@ -27,11 +27,12 @@ class ToRead(controller.CementBaseController):
                 note='*'
             else:
                 note=' '
-            print '%06.0f%s %05x [%8s] %s' % (
+            print '%06.0f%s %05x [%8s] %s %s' % (
                 float(pull['weight']) * 1e6,
                 note,
                 pull_id,
                 pull.get('stream_id'),
+                pull['pubdate'],
                 pull['name'],
             )
 
