@@ -81,18 +81,25 @@ class SyncController(controller.CementBaseController):
 
     def identify_pulls(self, directory):
         for path in os.listdir(directory):
-            match = re.search(r'\b([a-z0-9]{6})\b')
+            match = re.search(r'\b([a-z0-9]{6})\b', path)
             if match:
                 file_id = match.group(1)
                 try:
                     if int(file_id, 16):
-                        yield match
+                        yield file_id
                 except ValueError:
                     pass
 
+    def safe_name(self, name):
+        name = re.sub(r'/', '-', name)
+        return name
+
     @controller.expose(hide=True)
     def default(self):
-        existing_pulls = set(self.identify_pulls(self.app.pargs.destination))
+        existing_pulls = set(
+            list(self.identify_pulls(self.app.pargs.destination))
+        )
+        self.app.log.debug('existing issues: %r' % existing_pulls)
         sync_pulls = set()
         for pull in self.exportable_items():
             pull_id = int(pull['identifier'])
@@ -112,21 +119,28 @@ class SyncController(controller.CementBaseController):
             if not source:
                 raise ValueError(
                     'Cannot find file of supported type: %r' % items)
-            sync_pulls.add(pull['identifier'])
+            hex_id = '%06x' % pull_id
+            sync_pulls.add(hex_id)
+            destination_name = self.safe_name(pull['name'])
             destination = os.path.join(
                 self.app.pargs.destination,
-                '%s[%06x].%s' % (pull['name'], pull_id, file_type)
+                '%s [%s].%s' % (destination_name, hex_id, file_type)
             )
-            if pull['identifier'] in existing_pulls:
+            if hex_id in existing_pulls:
                 self.app.log.info(
                     'Skipping file %r.  Already present in destination.' % (
                         source['name']))
                 continue
+            self.app.log.info('Fetching %r -> %r' % (
+                source['name'], destination))
             self.app.longbox.fetch_file(source, destination)
 
         expired_pulls = existing_pulls - sync_pulls
+        self.app.log.debug('%r - %r = %r' % (
+            existing_pulls, sync_pulls, expired_pulls)
+        )
 
-        if expired_pulls:
+        if expired_pulls and False:
             self.expire_pulls(self.app.pargs.destination, expired_pulls)
 
 def load():
