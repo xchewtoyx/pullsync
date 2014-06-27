@@ -140,7 +140,7 @@ class SyncController(controller.CementBaseController):
             existing_pulls, sync_pulls, expired_pulls)
         )
 
-        if expired_pulls and False:
+        if expired_pulls:
             self.expire_pulls(self.app.pargs.destination, expired_pulls)
 
 def load():
