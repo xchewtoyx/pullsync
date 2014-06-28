@@ -48,8 +48,11 @@ class UploadController(controller.CementBaseController):
         normal = re.sub(r'[_+]', ' ', normal)
         normal = re.sub(r' +', ' ', normal)
         normal = normal.strip()
+        # Fixup issue numbers
+	# Remove random issue suffixes that Marvel seem to like
+        normal = re.sub(r'(\d+)(?:\.now)$', r'\g<1>', normal)
         # Strip leading zeroes from issue number
-        normal = re.sub(r'0+(\d+)$', r'\g<1>', normal)
+        normal = re.sub(r'\b0+(\d+)$', r'\g<1>', normal)
         # Try to identify the issue number
         issue_number = re.search(r'(\d+|)$', normal).group(1)
         return normal, issue_number
@@ -100,7 +103,7 @@ class UploadController(controller.CementBaseController):
             candidate[1], candidate[2]
         )
         pull_id = int(pull['identifier'])
-        destination = 'gs://long-box/comics/%2x/%2x/%x/' % (
+        destination = 'gs://long-box/comics/%02x/%02x/%x/' % (
             pull_id & 0xff,
             (pull_id & 0xff00) >> 8,
             pull_id,
