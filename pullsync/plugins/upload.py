@@ -39,20 +39,26 @@ class UploadController(controller.CementBaseController):
         normal = re.sub(r'.cb[rz]$', '', normal)
         # tags in brackets can be stripped
         normal = re.sub(r'\([^)]+\)', '', normal)
+        normal = re.sub(r'\[[^)]+\]', '', normal)
         # Somtimes a random volume number slips in
         normal = re.sub(r'\bv\d+\b', '', normal)
         # Some substitutions for known bad nameing
-        normal = re.sub(r'garth ennis\'?', '', normal)
         normal = re.sub(r'2000ad', '2000 ad', normal)
+        normal = re.sub(r'the black bat', 'black bat', normal)
+        normal = re.sub(r'digital exclusives edition', '', normal)
+        normal = re.sub(r'garth ennis\'?', '', normal)
+        normal = re.sub(r'george romero\'?s', '', normal)
+        normal = re.sub(r'^trinity of sin - the phantom stranger',
+                        'the phantom stranger', normal)
         # Normalise spaces.
         normal = re.sub(r'[_+]', ' ', normal)
         normal = re.sub(r' +', ' ', normal)
         normal = normal.strip()
         # Fixup issue numbers
 	# Remove random issue suffixes that Marvel seem to like
-        normal = re.sub(r'(\d+)(?:\.now)$', r'\g<1>', normal)
+        normal = re.sub(r'([.\d]+)(?:\.now)$', r'\g<1>', normal)
         # Strip leading zeroes from issue number
-        normal = re.sub(r'\b0+(\d+)$', r'\g<1>', normal)
+        normal = re.sub(r'\b0+([.\d]+)$', r'\g<1>', normal)
         # Try to identify the issue number
         issue_number = re.search(r'(\d+|)$', normal).group(1)
         return normal, issue_number
@@ -140,7 +146,10 @@ class UploadController(controller.CementBaseController):
                 )
             )
             if good_match and self.app.pargs.commit:
-                self.send_file(candidate, best_match[2])
+                try:
+                    self.send_file(candidate, best_match[2])
+                except subprocess.CalledProcessError as error:
+                    self.app.log.error('Error copytihg file: %r' % error)
 
 def load():
     handler.register(UploadController)
