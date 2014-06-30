@@ -83,7 +83,7 @@ class TodoSync(controller.CementBaseController):
                         'Skipping already handled pull %d' % pull_id
                     )
                     continue
-                if pull_id in seen:
+                if pull_id in seen and entry[pull_id].startswith('x '):
                     new_entries.append(entry[pull_id])
                 else:
                     new_entries.append('%s +%s {%s} [%s]' % (
