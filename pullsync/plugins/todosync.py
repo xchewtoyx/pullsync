@@ -75,7 +75,7 @@ class TodoSync(controller.CementBaseController):
             seen, entry, extra  = self.fetch_todo_entries()
             handled = set()
             new_entries = []
-            pulls = sorted(self.weighted_pulls())
+            pulls = sorted(list(self.weighted_pulls()))
             for weight, pull, pull_detail in pulls:
                 pull_id = int(pull_detail['identifier'])
                 if pull_id in handled:
