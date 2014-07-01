@@ -23,7 +23,7 @@ class ToRead(controller.CementBaseController):
         new_items = sorted(self.weighted_pulls())
         for weight, pull_key, pull in new_items:
             pull_id = int(pull['identifier'])
-            if not self.app.redis.client.sismember('gs:seen', pull_id):
+            if not self.app.redis.sismember('gs:seen', pull_id):
                 note='*'
             else:
                 note=' '
