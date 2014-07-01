@@ -23,6 +23,8 @@ def with_backoff(original_function):
                     time.sleep(2**attempt * backoff)
                 else:
                     raise
+            finally:
+                attempt += 1
     return retry_with_backoff
 
 class Longbox(controller.CementBaseController):
@@ -89,6 +91,37 @@ class Longbox(controller.CementBaseController):
             self.app.log.error('Error downloading file: %r' % error)
             os.unlink(destination)
 
+    def refresh(self):
+        self.app.redis.delete('pulls:seen')
+        pipe = self.app.redis.pipeline()
+        for pull in self.app.pulldb.list_unread():
+             pipe.sadd('pulls:unread', pull.split(':')[1])
+	pipe.execute()
+        unseen_items = self.app.redis.sdiff('pulls:unread', 'gs:seen')
+        self.app.log.debug('%r - %r = %r' % (
+            self.app.redis.smembers('pulls:unread'),
+            self.app.redis.smembers('gs:seen'),
+            unseen_items))
+        gsclient = build('storage', 'v1', http=self.app.google.client)
+
+        cache = []
+        
+        for pull_id in unseen_items:
+            pull = 'pull:%s' % pull_id
+            pull_id = int(pull_id)
+            pull_detail = json.loads(self.app.redis.client.get(pull))
+            pull_matches = self.check_prefix(gsclient, pull_id)
+            if pull_matches:
+                self.app.log.debug('File found for [%s] %s' % (
+                    pull_detail['identifier'], pull_detail['name']))
+                cache.append([pull, pull_matches])
+                for item in pull_matches:
+                    print item['name']
+            else:
+                self.app.log.debug('No match for %s' % (
+                    pull_detail['identifier'],)
+                )
+
     def scan(self):
         unread_items = self.app.pulldb.list_unread()
 
@@ -104,7 +137,7 @@ class Longbox(controller.CementBaseController):
                     pull_detail['identifier'], pull_detail['name']))
                 cache.append([pull, pull_matches])
                 for item in pull_matches:
-                    print item['mediaLink']
+                    print item['name']
             else:
                 self.app.log.debug('No match for %s' % (
                     pull_detail['identifier'],)
@@ -115,10 +148,19 @@ class ScanController(controller.CementBaseController):
         label = 'scan'
         stacked_on = 'base'
         stacked_type = 'nested'
+        arguments = [
+            (['--full'], {
+                'action': 'store_true',
+                'help': 'Scan all issues',
+            }),
+        ]
 
     @controller.expose(hide=True)
     def default(self):
-        self.app.longbox.scan()
+        if self.app.pargs.full:
+            self.app.longbox.scan()
+        else:
+            self.app.longbox.refresh()
 
 def load():
     handler.register(ScanController)
