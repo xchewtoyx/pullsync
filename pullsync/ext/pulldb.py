@@ -32,25 +32,19 @@ class PullDB(handler.CementBaseHandler):
 
     def refresh_unread(self):
         path = '/api/pulls/list/unread'
-        resp, content = self.app.google.client.request(self.base_url + path)
-        if resp.status != 200:
-            self.app.log.error(resp, content)
-            raise FetchError('Unable to fetch unread pulls')
-        else:
-            result = json.loads(content)
+        # Set all existing keys to expire in 5 seconds
+        pipe = self.app.redis.pipeline()
+        for key in self.app.redis.keys('pull:*'):
+            pipe.expire(key, 5)
+        pipe.execute()
 
-            # Set all existing keys to expire in 5 seconds
-            pipe = self.app.redis.pipeline()
-            for key in self.app.redis.keys('pull:*'):
-                pipe.expire(key, 5)
-            pipe.execute()
-
-            # Load the newly fetched keys, resetting the ttls to 1 day
-            self.app.redis.multi_set(
-                self.extract_pulls(result),
-                ttl=timedelta(1),
-            )
-        
+        position = None
+        while True:
+            self.app.log.debug('fetching %s %r' % (path, position))
+            result = self.fetch_page(path, cursor=position)
+            if not result['more']:
+                break
+            position = result.get('position')
 
     def fetch_page(self, path, cursor=None):
         if cursor:
