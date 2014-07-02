@@ -22,6 +22,14 @@ class SyncController(controller.CementBaseController):
                 'action': 'store',
                 'required': True,
             }),
+            (['--strict'], {
+                'help': (
+                    'Remove any files not in the sync set, even if unread. '
+                    'This will reduce the storage used in the sync destination '
+                    'at the expense of additional network traffic.'
+                ),
+                'action': 'store_true',
+            }),
         ]
 
     def weighted_pulls(self):
@@ -135,7 +143,14 @@ class SyncController(controller.CementBaseController):
                 source['name'], destination))
             self.app.longbox.fetch_file(source, destination)
 
-        expired_pulls = existing_pulls - sync_pulls
+        if self.app.pargs.strict:
+            expired_pulls = existing_pulls - sync_pulls
+        else:
+            expired_pulls = []
+            for hex_id in existing_pulls:
+                pull_key = 'pull:%d' % int(hex_id, 16)
+                if not self.app.redis.get(pull_key):
+                    expired_pulls.append(hex_id)
         self.app.log.debug('%r - %r = %r' % (
             existing_pulls, sync_pulls, expired_pulls)
         )
