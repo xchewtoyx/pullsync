@@ -52,8 +52,9 @@ class PullDB(handler.CementBaseHandler):
             )
         
 
-    def fetch_unread(self):
-        path = '/api/pulls/list/unread'
+    def fetch_page(self, path, cursor=None):
+        if cursor:
+            path = path + '?position=%s' % cursor
         resp, content = self.app.google.client.request(self.base_url + path)
         if resp.status != 200:
             self.app.log.error(resp, content)
@@ -66,6 +67,17 @@ class PullDB(handler.CementBaseHandler):
                 self.extract_pulls(result),
                 ttl=timedelta(1),
             )
+        return result
+
+    def fetch_unread(self):
+        path = '/api/pulls/list/unread'
+        position = None
+        while True:
+            self.app.log.debug('fetching %s %r' % (path, position))
+            result = self.fetch_page(path, cursor=position)
+            if not result['more']:
+                break
+            position = result.get('position')
 
     def list_unread(self):
         return self.app.redis.client.keys('pull:*')
