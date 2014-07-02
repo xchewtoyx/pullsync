@@ -44,8 +44,12 @@ class Longbox(controller.CementBaseController):
             else:
                 return json.loads(file_detail)
 
+    @property
+    def client(self):
+        return build('storage', 'v1', http=self.app.google.client)
+
     @with_backoff
-    def check_prefix(self, gsclient, pull_id):
+    def check_prefix(self, pull_id):
         file_detail = None
         prefix = 'comics/%02x/%02x/%x' % (
             pull_id & 0xff,
@@ -54,7 +58,7 @@ class Longbox(controller.CementBaseController):
         )
         file_detail = self.file_detail(pull_id)
         if not file_detail:
-            request = gsclient.objects().list(bucket='long-box', prefix=prefix)
+            request = self.client.objects().list(bucket='long-box', prefix=prefix)
             response = request.execute()
             if 'items' in response:
                 self.app.log.debug('Files found for prefix %s' % prefix)
@@ -68,9 +72,8 @@ class Longbox(controller.CementBaseController):
         return file_detail
 
     def fetch_file(self, item_detail, destination):
-        gsclient = build('storage', 'v1', http=self.app.google.client)
         # Get Payload Data
-        req = gsclient.objects().get_media(
+        req = self.client.objects().get_media(
             bucket=item_detail['bucket'],
             object=item_detail['name'],
         )
@@ -102,7 +105,6 @@ class Longbox(controller.CementBaseController):
             self.app.redis.smembers('pulls:unread'),
             self.app.redis.smembers('gs:seen'),
             unseen_items))
-        gsclient = build('storage', 'v1', http=self.app.google.client)
 
         cache = []
         
@@ -110,7 +112,7 @@ class Longbox(controller.CementBaseController):
             pull = 'pull:%s' % pull_id
             pull_id = int(pull_id)
             pull_detail = json.loads(self.app.redis.client.get(pull))
-            pull_matches = self.check_prefix(gsclient, pull_id)
+            pull_matches = self.check_prefix(pull_id)
             if pull_matches:
                 self.app.log.debug('File found for [%s] %s' % (
                     pull_detail['identifier'], pull_detail['name']))
@@ -125,13 +127,11 @@ class Longbox(controller.CementBaseController):
     def scan(self):
         unread_items = self.app.pulldb.list_unread()
 
-        gsclient = build('storage', 'v1', http=self.app.google.client)
-
         cache = []
         for pull in unread_items:
             pull_detail = json.loads(self.app.redis.client.get(pull))
             pull_id = int(pull_detail['id'])
-            pull_matches = self.check_prefix(gsclient, pull_id)
+            pull_matches = self.check_prefix(pull_id)
             if pull_matches:
                 self.app.log.debug('File found for [%s] %s' % (
                     pull_detail['identifier'], pull_detail['name']))

@@ -148,6 +148,11 @@ class UploadController(controller.CementBaseController):
                 )
             )
             if good_match and self.app.pargs.commit:
+                pull_id = int(best_match[2]['identifier'])
+                detail = self.app.longbox.check_prefix(pull_id)
+                if detail:
+                    self.app.log.info('Pull %d has already been uploaded, skipping' % pull_id)
+                    continue
                 try:
                     self.send_file(candidate, best_match[2])
                 except subprocess.CalledProcessError as error:
