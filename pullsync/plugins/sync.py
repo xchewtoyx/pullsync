@@ -66,7 +66,7 @@ class SyncController(controller.CementBaseController):
                         pull_detail['stream_id']
                 ))
                 continue
-            if not self.app.redis.sismember('gs:seen', pull_id):
+            if not self.app.longbox.check_prefix(pull_id):
                 self.app.log.warn(
                     'Issue %s(%s) not in longbox.  Stalling stream %s.' % (
                         pull_detail['name'],
