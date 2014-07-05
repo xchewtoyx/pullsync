@@ -115,7 +115,11 @@ class SyncController(controller.CementBaseController):
                 int(float(pull['weight'])*1e6),
                 pull['name'],
             )
-            items = json.loads(self.app.redis.get('gs:file:%d' % pull_id))
+            items = self.app.longbox.check_prefix(pull_id)
+            if not items:
+                self.app.log.warn(
+                    'Could not find file details for %d, skipping' % pull_id)
+                continue
             source = None
             for item in items:
                 if item['contentType'] == 'application/x-cbr':
