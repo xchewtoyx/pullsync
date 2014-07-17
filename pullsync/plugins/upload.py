@@ -25,7 +25,7 @@ class UploadController(controller.CementBaseController):
                 'help': 'Maximum safe Levenshtein distance',
                 'action': 'store',
                 'type': float,
-                'default': 0.2,
+                'default': 0.25,
             }),
             (['--commit'], {
                 'help': 'Perform uploads for files that meet threshold',
@@ -34,7 +34,9 @@ class UploadController(controller.CementBaseController):
         ]
 
     def normalise_name(self, original_name):
+        # lowercase and change space characters
         normal = original_name.lower()
+        normal = re.sub(r'[_+]', ' ', normal)
         # Remove the file extension
         normal = re.sub(r'.cb[rz]$', '', normal)
         # tags in brackets can be stripped
@@ -44,14 +46,17 @@ class UploadController(controller.CementBaseController):
         normal = re.sub(r'\bv\d+\b', '', normal)
         # Some substitutions for known bad nameing
         normal = re.sub(r'2000ad', '2000 ad', normal)
-        normal = re.sub(r'the black bat', 'black bat', normal)
+        normal = re.sub(r'(abe sapien \d+) -.*', r'\g<1>', normal)
+        normal = re.sub(r'(b.p.r.d. hell on earth \d+) -.*', r'\g<1>', normal)
         normal = re.sub(r'digital exclusives edition', '', normal)
         normal = re.sub(r'garth ennis\'?', '', normal)
         normal = re.sub(r'george romero\'?s', '', normal)
+        normal = re.sub(r'(outcast) by kirkman & azaceta', r'\g<1>', normal)
+        normal = re.sub(r'the black bat', r'black bat', normal)
+        normal = re.sub(r'the devilers', r'devilers', normal)
+        normal = re.sub(r'robin rises omega', r'robin rises', normal)
         normal = re.sub(r'^trinity of sin - the phantom stranger',
                         'the phantom stranger', normal)
-        normal = re.sub(r'(abe sapien \d+) -.*', r'\g<1>', normal)
-        normal = re.sub(r'(b.p.r.d. hell on earth \d+) -.*', r'\g<1>', normal)
         # Normalise spaces.
         normal = re.sub(r'[_+]', ' ', normal)
         normal = re.sub(r' +', ' ', normal)
