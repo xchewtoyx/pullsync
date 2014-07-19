@@ -21,20 +21,24 @@ class ToRead(controller.CementBaseController):
     @controller.expose(hide=True)
     def default(self):
         new_items = sorted(self.weighted_pulls())
-        for weight, pull_key, pull in new_items:
-            pull_id = int(pull['identifier'])
-            if not self.app.redis.sismember('gs:seen', pull_id):
-                note='*'
-            else:
-                note=' '
-            print '%06.0f%s %05x [%8.8s] %s %s' % (
-                float(pull['weight']) * 1e6,
-                note,
-                pull_id,
-                pull.get('stream_id'),
-                pull['pubdate'],
-                pull['name'],
-            )
+        try:
+            for weight, pull_key, pull in new_items:
+                pull_id = int(pull['identifier'])
+                if not self.app.redis.sismember('gs:seen', pull_id):
+                    note='*'
+                else:
+                    note=' '
+                print '%06.0f%s %05x [%8.8s] %s %s' % (
+                    float(pull['weight']) * 1e6,
+                    note,
+                    pull_id,
+                    pull.get('stream_id'),
+                    pull['pubdate'],
+                    pull['name'],
+                )
+        except IOError:
+            # Suppress Broken pipe error
+            pass
 
 def load():
     handler.register(ToRead)
