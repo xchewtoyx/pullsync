@@ -57,6 +57,7 @@ class UploadController(controller.CementBaseController):
         normal = re.sub(r'robin rises omega', r'robin rises', normal)
         normal = re.sub(r'^trinity of sin - the phantom stranger',
                         'the phantom stranger', normal)
+        normal = re.sub(r'by kirkman & azaceta', '', normal)
         # Normalise spaces.
         normal = re.sub(r'[_+]', ' ', normal)
         normal = re.sub(r' +', ' ', normal)

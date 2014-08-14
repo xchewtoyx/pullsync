@@ -28,7 +28,7 @@ class ToRead(controller.CementBaseController):
                     note='*'
                 else:
                     note=' '
-                print '%06.0f%s %05x [%8.8s] %s %s' % (
+                print '%07.0f%s %6d [%8.8s] %s %s' % (
                     float(pull['weight']) * 1e6,
                     note,
                     pull_id,

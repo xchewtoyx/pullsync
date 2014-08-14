@@ -111,7 +111,12 @@ class Longbox(controller.CementBaseController):
         for pull_id in unseen_items:
             pull = 'pull:%s' % pull_id
             pull_id = int(pull_id)
-            pull_detail = json.loads(self.app.redis.client.get(pull))
+            pull_detail = self.app.redis.client.get(pull)
+            if pull_detail:
+                pull_detail = json.loads(pull_detail)
+            else:
+                print 'skipping %d' % pull_id
+                continue
             pull_matches = self.check_prefix(pull_id)
             if pull_matches:
                 self.app.log.debug('File found for [%s] %s' % (
