@@ -11,6 +11,9 @@ from cement.core import controller, handler, hook, interface
 from dateutil.parser import parse as parse_date
 from Levenshtein import distance
 
+from pullsync.ext import interfaces
+
+
 def with_backoff(original_function):
     def retry_with_backoff(*args, **kwargs):
         backoff = 0.1
@@ -27,14 +30,16 @@ def with_backoff(original_function):
                 attempt += 1
     return retry_with_backoff
 
+
 class Longbox(controller.CementBaseController):
     class Meta:
+        interface = interfaces.DataInterface
         label = 'scan'
 
     def _setup(self, app):
-        self.app = app
+        super(Longbox, self)._setup(app)
         self.app.log.debug('Setting up longbox interface')
-        self.app.longbox = self
+        self.app.extend('longbox', self)
 
     def file_detail(self, pull_id):
         if self.app.redis.client.sismember('gs:seen', pull_id):
@@ -58,7 +63,8 @@ class Longbox(controller.CementBaseController):
         )
         file_detail = self.file_detail(pull_id)
         if not file_detail:
-            request = self.client.objects().list(bucket='long-box', prefix=prefix)
+            request = self.client.objects().list(
+                bucket='long-box', prefix=prefix)
             response = request.execute()
             if 'items' in response:
                 self.app.log.debug('Files found for prefix %s' % prefix)
@@ -98,8 +104,8 @@ class Longbox(controller.CementBaseController):
         self.app.redis.delete('pulls:seen')
         pipe = self.app.redis.pipeline()
         for pull in self.app.pulldb.list_unread():
-             pipe.sadd('pulls:unread', pull.split(':')[1])
-	pipe.execute()
+            pipe.sadd('pulls:unread', pull['identifier'])
+        pipe.execute()
         unseen_items = self.app.redis.sdiff('pulls:unread', 'gs:seen')
         self.app.log.debug('%r - %r = %r' % (
             self.app.redis.smembers('pulls:unread'),
@@ -107,7 +113,7 @@ class Longbox(controller.CementBaseController):
             unseen_items))
 
         cache = []
-        
+
         for pull_id in unseen_items:
             pull = 'pull:%s' % pull_id
             pull_id = int(pull_id)
@@ -148,6 +154,7 @@ class Longbox(controller.CementBaseController):
                     pull_detail['identifier'],)
                 )
 
+
 class ScanController(controller.CementBaseController):
     class Meta:
         label = 'scan'
@@ -166,6 +173,7 @@ class ScanController(controller.CementBaseController):
             self.app.longbox.scan()
         else:
             self.app.longbox.refresh()
+
 
 def load():
     handler.register(ScanController)

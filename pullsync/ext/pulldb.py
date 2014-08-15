@@ -4,19 +4,23 @@ import os
 
 from cement.core import controller, handler, hook
 from dateutil.parser import parse as parse_date
-import xdg
+import xdg.BaseDirectory
+
+from pullsync.ext import interfaces
+
 
 class FetchError(Exception):
     pass
 
+
 class PullDB(handler.CementBaseHandler):
     class Meta:
+        interface = interfaces.DataInterface
         label = 'pulldb'
 
     def _setup(self, app):
-        app.log.debug('Setting up pulldb handler')
-        self.app = app
-        self.app.pulldb = self
+        super(PullDB, self)._setup(app)
+        self.app.extend('pulldb', self)
         self.base_url = self.app.config.get('pulldb', 'base_url')
         self.data_dir = xdg.BaseDirectory.save_data_path(
             self.app._meta.label)
@@ -46,7 +50,7 @@ class PullDB(handler.CementBaseHandler):
                 break
             position = result.get('position')
 
-    def fetch_page(self, path, cursor=None):
+    def fetch_page(self, path, cursor=None, cache=True):
         if cursor:
             path = path + '?position=%s' % cursor
         resp, content = self.app.google.client.request(self.base_url + path)
@@ -57,24 +61,50 @@ class PullDB(handler.CementBaseHandler):
             with open(self.unread_file, 'w') as unread_pulls:
                 unread_pulls.write(content)
             result = json.loads(content)
-            self.app.redis.multi_set(
-                self.extract_pulls(result),
-                ttl=timedelta(1),
-            )
+            if cache:
+                self.app.redis.multi_set(
+                    self.extract_pulls(result),
+                    ttl=timedelta(1),
+                )
         return result
+
+    def fetch_new(self):
+        path = '/api/pulls/list/new'
+        position = None
+        results = []
+        while True:
+            self.app.log.debug('fetching %s %r' % (path, position))
+            results_page = self.fetch_page(path, cursor=position, cache=False)
+            results.extend(
+                [result['pull'] for result in results_page['results']])
+            if not results_page['more']:
+                break
+            position = result_page.get('position')
+        return results
 
     def fetch_unread(self):
         path = '/api/pulls/list/unread'
         position = None
+        results = []
         while True:
             self.app.log.debug('fetching %s %r' % (path, position))
-            result = self.fetch_page(path, cursor=position)
-            if not result['more']:
+            results_page = self.fetch_page(path, cursor=position)
+            results.extend(
+                [result['pull'] for result in results_page['results']])
+            if not results_page['more']:
                 break
-            position = result.get('position')
+            position = result_page.get('position')
+        return results
 
     def list_unread(self):
-        return self.app.redis.client.keys('pull:*')
+        for key in self.app.redis.client.keys('pull:*'):
+            yield json.loads(self.app.redis.get(key))
+
+    def list_unseen(self):
+        for pull in self.list_unread():
+            if not self.app.redis.client.sismember(
+                    'gs:seen', int(pull['id'])):
+                yield pull
 
     def refresh_pull(self, pull_id, prefix='pull'):
         path = '/api/pulls/%d/get' % pull_id
@@ -95,6 +125,7 @@ class PullDB(handler.CementBaseHandler):
                     key, ttl, json.dumps(pull['pull']))
                 return pull['pull']
 
+
 class FetchPulls(controller.CementBaseController):
     class Meta:
         label = 'fetch'
@@ -104,6 +135,7 @@ class FetchPulls(controller.CementBaseController):
     @controller.expose(hide=True)
     def default(self):
         self.app.pulldb.refresh_unread()
+
 
 def load():
     handler.register(FetchPulls)

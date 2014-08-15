@@ -10,6 +10,7 @@ from cement.core import controller, handler
 from dateutil.parser import parse as parse_date
 from Levenshtein import distance
 
+
 class UploadController(controller.CementBaseController):
     class Meta:
         label = 'upload'
@@ -30,6 +31,11 @@ class UploadController(controller.CementBaseController):
             (['--commit'], {
                 'help': 'Perform uploads for files that meet threshold',
                 'action': 'store_true',
+            }),
+            (['--check_type'], {
+                'help': 'Check for new pulls, or cached unseen pulls',
+                'choices': ['new', 'unseen'],
+                'default': 'unseen'
             }),
         ]
 
@@ -63,7 +69,7 @@ class UploadController(controller.CementBaseController):
         normal = re.sub(r' +', ' ', normal)
         normal = normal.strip()
         # Fixup issue numbers
-	# Remove random issue suffixes that Marvel seem to like
+        # Remove random issue suffixes that Marvel seem to like
         normal = re.sub(r'([.\d]+)(?:\.now)$', r'\g<1>', normal)
         # Strip leading zeroes from issue number
         normal = re.sub(r'\b0+([.\d]+)$', r'\g<1>', normal)
@@ -105,12 +111,13 @@ class UploadController(controller.CementBaseController):
                 if filename.endswith(('.cbr', '.cbz')):
                     yield (self.normalise_name(filename), path, filename)
 
-    def identify_unseen(self):
-        unread = self.app.pulldb.list_unread()
-        for key in unread:
-            dummy, pull_id = key.split(':')
-            if not self.app.redis.client.sismember('gs:seen', int(pull_id)):
-                yield json.loads(self.app.redis.get(key))
+    def identify_unseen(self, check_type='unseen'):
+        if check_type == 'unseen':
+            pulls = self.app.pulldb.list_unseen()
+        else:
+            pulls = self.app.pulldb.fetch_new()
+        for pull in pulls:
+            yield pull
 
     def send_file(self, candidate, pull):
         filename = os.path.join(
@@ -132,7 +139,10 @@ class UploadController(controller.CementBaseController):
     @controller.expose(hide=True)
     def default(self):
         candidates = list(self.scan_dir(self.app.pargs.scandir))
-        pulls = list(self.identify_unseen())
+        self.app.log.debug('Candidate files: %r' % candidates)
+        pulls = list(self.identify_unseen(
+            check_type=self.app.pargs.check_type))
+        self.app.log.debug('Unseen pulls: %r' % pulls)
         match_cache = []
         for candidate in candidates:
             matches = [
@@ -146,7 +156,7 @@ class UploadController(controller.CementBaseController):
             good_match = bool(
                 best_match[1] < self.app.pargs.threshold and not best_match[0]
             )
-            self.app.log.debug( 'Match: %5r <%0.4f> [%s -> %s]' % (
+            self.app.log.debug('Match: %5r <%0.4f> [%s -> %s]' % (
                 good_match,
                 best_match[1],
                 best_match[3][0],
@@ -157,12 +167,15 @@ class UploadController(controller.CementBaseController):
                 pull_id = int(best_match[2]['identifier'])
                 detail = self.app.longbox.check_prefix(pull_id)
                 if detail:
-                    self.app.log.info('Pull %d has already been uploaded, skipping' % pull_id)
+                    self.app.log.info(
+                        'Pull %d has already been uploaded, skipping' % (
+                            pull_id,))
                     continue
                 try:
                     self.send_file(candidate, best_match[2])
                 except subprocess.CalledProcessError as error:
-                    self.app.log.error('Error copytihg file: %r' % error)
+                    self.app.log.error('Error copying file: %r' % error)
+
 
 def load():
     handler.register(UploadController)

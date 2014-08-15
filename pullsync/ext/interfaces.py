@@ -9,6 +9,14 @@ class AuthInterface(interface.Interface):
         pass
 
 
+class DataInterface(interface.Interface):
+    class IMeta:
+        label = 'data'
+
+    def _setup(app):
+        pass
+
+
 class PullsInterface(interface.Interface):
     class IMeta:
         label = 'pulls'
@@ -27,5 +35,6 @@ class ReadinglistInterface(interface.Interface):
 
 def load():
     handler.define(AuthInterface)
+    handler.define(DataInterface)
     handler.define(PullsInterface)
     handler.define(ReadinglistInterface)
