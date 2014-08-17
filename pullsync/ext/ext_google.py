@@ -11,6 +11,7 @@ import xdg.BaseDirectory
 
 from pullsync.ext.interfaces import AuthInterface
 
+
 class GoogleHandler(handler.CementBaseHandler):
     class Meta:
         interface = AuthInterface
@@ -23,8 +24,8 @@ class GoogleHandler(handler.CementBaseHandler):
 
     def _setup(self, app):
         app.log.debug('Setting up google api client')
-        self.app = app
-        self.app.google = self
+        super(GoogleHandler, self)._setup(app)
+        self.app.extend('google', self)
 
     @property
     def client_secrets(self):
@@ -64,12 +65,14 @@ class GoogleHandler(handler.CementBaseHandler):
         self.credential_store.get().authorize(http_client)
         return http_client
 
+
 def load_google_args(app):
     if not isinstance(app.args, argparse.ArgumentParser):
         raise TypeError('Cannot add arguments no non argparse parser %r' % (
             app.args))
     app.args._add_container_actions(tools.argparser)
     app.args.set_defaults(noauth_local_webserver=True)
+
 
 def load():
     handler.register(GoogleHandler)

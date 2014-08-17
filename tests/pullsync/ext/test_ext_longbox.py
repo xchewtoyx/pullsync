@@ -24,9 +24,9 @@ class TestApp(foundation.CementApp):
         extensions = [
             # interfaces must go first
             'pullsync.ext.interfaces',
-            'pullsync.ext.longbox',
-            'pullsync.ext.pulldb',
-            'pullsync.ext.rediscache',
+            'pullsync.ext.ext_longbox',
+            'pullsync.ext.ext_pulldb',
+            'pullsync.ext.ext_redis',
         ]
 
 

@@ -19,8 +19,8 @@ class TestApp(foundation.CementApp):
         extensions = [
             # interfaces must go first
             'pullsync.ext.interfaces',
-            'pullsync.ext.pulldb',
-            'pullsync.ext.rediscache',
+            'pullsync.ext.ext_pulldb',
+            'pullsync.ext.ext_redis',
         ]
         plugin_bootstrap = 'pullsync.plugins'
 

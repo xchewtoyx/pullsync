@@ -17,9 +17,8 @@ class TestApp(foundation.CementApp):
             os.path.join(TEST_DATA_DIR, 'pulldb.conf')
         ]
         extensions = [
-            # interfaces must go first
             'pullsync.ext.interfaces',
-            'pullsync.ext.pulldb',
+            'pullsync.ext.ext_pulldb'
         ]
 
 

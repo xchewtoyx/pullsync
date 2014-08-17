@@ -1,9 +1,7 @@
-import argparse
-import json
 import os
-from urllib import urlencode
 
 from cement.core import foundation, controller
+
 
 class BaseController(controller.CementBaseController):
     class Meta:
@@ -13,23 +11,29 @@ class BaseController(controller.CementBaseController):
     def default(self):
         self.app.args.print_help()
 
-def run():
-    app = foundation.CementApp(
-        label='pullsync', base_controller=BaseController,
-        extensions=[
+
+class PullsyncApp(foundation.CementApp):
+    class Meta:
+        label = 'pullsync'
+        base_controller = BaseController
+        extensions = [
             # interfaces must go first
             'pullsync.ext.interfaces',
-            'pullsync.ext.google',
-            'pullsync.ext.longbox',
-            'pullsync.ext.pulldb',
-            'pullsync.ext.rediscache',
+            'pullsync.ext.ext_google',
+            'pullsync.ext.ext_longbox',
+            'pullsync.ext.ext_pulldb',
+            'pullsync.ext.ext_redis',
         ]
-    )
+
+
+def run():  # pragma: no cover
+    app = PullsyncApp()
     try:
         app.setup()
         app.run()
     finally:
-        app.close
+        app.close()
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  # pragma: no cover
     main()
