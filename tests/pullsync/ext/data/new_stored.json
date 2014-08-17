@@ -1,0 +1,68 @@
+{
+  "1000": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/e8/03/3e8/Test Issue 1.cbr",
+    "contentLanguage": "en",
+    "generation": "1408145935963000",
+    "md5Hash": "eOjYd4CY9ceez7BrZ7hfcA==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:38:55.830Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "We5VSw==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2Fe8%2F03%2F3e8%2FTest%20Issue%201.cbr?generation=1408145935963000&alt=media",
+    "etag": "CPimuLK4lsACEAE=",
+    "id": "long-box/comics/e8/03/3e8/Test Issue 1.cbr/1408145935963000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2Fe8%2F03%2F3e8%2FTest Issue 1.cbr",
+    "size": "43499028"
+  },
+  "1001": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/e9/03/3e9/Test Issue 2.cbr",
+    "contentLanguage": "en",
+    "generation": "1408145935963000",
+    "md5Hash": "eOjYd4CY9ceez7BrZ7hfcA==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:38:55.830Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "We5VSw==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2Fe9%2F03%2F3e9%2FTest%20Issue%202.cbr?generation=1408145935963000&alt=media",
+    "etag": "CPimuLK4lsACEAE=",
+    "id": "long-box/comics/e9/03/3e9/Test Issue 2.cbr/1408145935963001",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2Fe9%2F03%2F3e9%2FTest Issue 2.cbr",
+    "size": "43499028"
+  },
+  "1003": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/e9/03/3e9/Test Issue 2.cbr",
+    "contentLanguage": "en",
+    "generation": "1408145935963000",
+    "md5Hash": "eOjYd4CY9ceez7BrZ7hfcA==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:38:55.830Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "We5VSw==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2Fe9%2F03%2F3e9%2FTest%20Issue%202.cbr?generation=1408145935963000&alt=media",
+    "etag": "CPimuLK4lsACEAE=",
+    "id": "long-box/comics/e9/03/3e9/Test Issue 2.cbr/1408145935963001",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2Fe9%2F03%2F3e9%2FTest Issue 2.cbr",
+    "size": "43499028"
+  }
+}

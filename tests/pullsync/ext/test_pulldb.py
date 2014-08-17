@@ -42,7 +42,7 @@ class PulldbTest(test.CementTestCase):
 
     def fetch_new_test(self):
         self.app.setup()
-        with open(os.path.join(TEST_DATA_DIR, 'new.json')) as json_file:
+        with open(os.path.join(TEST_DATA_DIR, 'fetch_new.json')) as json_file:
             unread = json.load(json_file)
         self.app.pulldb.fetch_page = mock.Mock(return_value=unread)
         self.assertEqual(len(unread['results']), 39)

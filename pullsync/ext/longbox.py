@@ -34,12 +34,14 @@ def with_backoff(original_function):
 class Longbox(controller.CementBaseController):
     class Meta:
         interface = interfaces.DataInterface
-        label = 'scan'
+        label = 'longbox'
 
     def _setup(self, app):
         super(Longbox, self)._setup(app)
         self.app.log.debug('Setting up longbox interface')
         self.app.extend('longbox', self)
+        # _http can be used to insert a HTTP Mock for testing
+        self._http = None
 
     def file_detail(self, pull_id):
         if self.app.redis.client.sismember('gs:seen', pull_id):
@@ -51,7 +53,9 @@ class Longbox(controller.CementBaseController):
 
     @property
     def client(self):
-        return build('storage', 'v1', http=self.app.google.client)
+        if not self._http:
+            self._http = self.app.google.client
+        return build('storage', 'v1', http=self._http)
 
     @with_backoff
     def check_prefix(self, pull_id):
@@ -135,18 +139,18 @@ class Longbox(controller.CementBaseController):
                     pull_detail['identifier'],)
                 )
 
-    def scan(self):
-        unread_items = self.app.pulldb.list_unread()
+    def scan(self, new=False):
+        if new:
+            unread_items = self.app.pulldb.fetch_new()
+        else:
+            unread_items = self.app.pulldb.list_unread()
 
-        cache = []
-        for pull in unread_items:
-            pull_detail = json.loads(self.app.redis.client.get(pull))
+        for pull_detail in unread_items:
             pull_id = int(pull_detail['id'])
             pull_matches = self.check_prefix(pull_id)
             if pull_matches:
                 self.app.log.debug('File found for [%s] %s' % (
                     pull_detail['identifier'], pull_detail['name']))
-                cache.append([pull, pull_matches])
                 for item in pull_matches:
                     print item['name']
             else:
@@ -165,14 +169,16 @@ class ScanController(controller.CementBaseController):
                 'action': 'store_true',
                 'help': 'Scan all issues',
             }),
+            (['--new', '-n'], {
+                'action': 'store_true',
+                'help': 'Scan only new issues',
+            }),
         ]
 
     @controller.expose(hide=True)
     def default(self):
-        if self.app.pargs.full:
-            self.app.longbox.scan()
-        else:
-            self.app.longbox.refresh()
+        if self.app.pargs.full or self.app.pargs.new:
+            self.app.longbox.scan(new=self.app.pargs.new)
 
 
 def load():
