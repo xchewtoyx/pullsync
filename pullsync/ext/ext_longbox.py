@@ -179,6 +179,8 @@ class ScanController(controller.CementBaseController):
     def default(self):
         if self.app.pargs.full or self.app.pargs.new:
             self.app.longbox.scan(new=self.app.pargs.new)
+        else:
+            self.app.longbox.refresh()
 
 
 def load():

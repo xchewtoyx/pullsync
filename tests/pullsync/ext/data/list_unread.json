@@ -1,9 +1,5 @@
-{  "status": 200,
-  "position": "E-ABAOsB8gEHcHViZGF0ZfoBCQiAwP7A947AAuwBggI0ag9zfmNvbWljLXB1bGwtZGJyIQsSBFVzZXIYgICAgICesQoMCxIEUHVsbCIGNDYyMzE0DIgCABQ=",
-  "message": "Found 39 results",
-  "more": false,
-  "results": [
-  { "pull": {
+[
+ {
     "name": "Test Issue 1",
     "pubdate": "2014-04-02",
     "read": "False",
@@ -17,8 +13,8 @@
     "identifier": "1000",
     "publisher_id": "1",
     "id": "1000"
-  }},
-  { "pull": {
+  },
+  {
     "name": "Test Issue 2",
     "pubdate": "2014-04-02",
     "read": "False",
@@ -32,8 +28,8 @@
     "identifier": "1001",
     "publisher_id": "1",
     "id": "1001"
-  }},
-  { "pull": {
+  },
+  {
     "name": "Test Issue 3",
     "pubdate": "2014-04-02",
     "read": "False",
@@ -47,8 +43,8 @@
     "identifier": "1002",
     "publisher_id": "1",
     "id": "1002"
-  }},
-  { "pull": {
+  },
+  {
     "name": "Test Issue 4",
     "pubdate": "2014-04-02",
     "read": "False",
@@ -62,8 +58,8 @@
     "identifier": "1003",
     "publisher_id": "1",
     "id": "1003"
-  }},
-  { "pull": {
+  },
+  {
     "name": "Test Issue 5",
     "pubdate": "2014-04-02",
     "read": "False",
@@ -77,5 +73,5 @@
     "identifier": "1004",
     "publisher_id": "1",
     "id": "1004"
-  }}]
-}
+  }
+]

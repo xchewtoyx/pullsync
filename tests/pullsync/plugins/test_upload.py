@@ -121,6 +121,8 @@ class UploadPluginTest(test.CementTestCase):
             best_match = json.load(pull_data)
         # cases: unread pull, no file, transfer fails
         upload.subprocess.check_call = mock.Mock(side_effect=ProcessError)
+        self.app.redis.client.sadd.reset_mock()
+        self.app.redis.client.set.reset_mock()
         with self.assertRaises(ProcessError):
             plugin.commit_file(best_match, candidate)
         assert not self.app.redis.client.sadd.called, (

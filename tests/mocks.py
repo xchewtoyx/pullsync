@@ -27,7 +27,7 @@ class MockRedis(mock.Mock):
             cls.longbox_data = json.load(json_file)
         cls.seen_keys = cls.longbox_data.keys()
         cls.seen_dict = {
-            "gs:seen:%s" % key: json.dumps(value) for key, value in
+            "gs:file:%s" % key: json.dumps(value) for key, value in
             cls.longbox_data.items()
         }
 
@@ -35,8 +35,12 @@ class MockRedis(mock.Mock):
     def reset_additions(cls):
         cls.additions = {}
 
+    @classmethod
+    def _set(cls, key, value):
+        cls.additions[key] = value
+
     fetch_unread = mock.Mock(side_effect=lambda: MockRedis.pull_data)
     get = mock.Mock(side_effect=lambda k: MockRedis.pull_dict.get(k))
     keys = mock.Mock(side_effect=lambda k: MockRedis.pull_keys)
-    set = mock.Mock(side_effect=lambda k, v: MockRedis.additions.add(k, v))
+    set = mock.Mock(side_effect=lambda k, v: MockRedis._set(k, v))
     sismember = mock.Mock(side_effect=lambda s, k: k in MockRedis.seen_keys)

@@ -1,7 +1,7 @@
 {  "status": 200,
   "position": "E-ABAOsB8gEHcHViZGF0ZfoBCQiAwP7A947AAuwBggI0ag9zfmNvbWljLXB1bGwtZGJyIQsSBFVzZXIYgICAgICesQoMCxIEUHVsbCIGNDYyMzE0DIgCABQ=",
   "message": "Found 39 results",
-  "more": false,
+  "more": "False",
   "results": [
   { "pull": {
     "name": "Test Issue 1",

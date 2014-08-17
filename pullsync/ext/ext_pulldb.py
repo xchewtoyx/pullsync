@@ -57,6 +57,7 @@ class PullDB(handler.CementBaseHandler):
     def fetch_page(self, path, cursor=None, cache=True):
         if cursor:
             path = path + '?position=%s' % cursor
+        self.app.log.info('Sending request for %r' % (path,))
         resp, content = self.app.google.client.request(self.base_url + path)
         if resp.status != 200:
             self.app.log.error(resp, content)
@@ -83,7 +84,7 @@ class PullDB(handler.CementBaseHandler):
                 [result['pull'] for result in results_page['results']])
             if not results_page['more']:
                 break
-            position = result_page.get('position')
+            position = results_page.get('position')
         return results
 
     def fetch_unread(self):
@@ -97,7 +98,7 @@ class PullDB(handler.CementBaseHandler):
                 [result['pull'] for result in results_page['results']])
             if not results_page['more']:
                 break
-            position = result_page.get('position')
+            position = results_page.get('position')
         return results
 
     def list_unread(self):

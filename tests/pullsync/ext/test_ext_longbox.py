@@ -24,6 +24,7 @@ class TestApp(foundation.CementApp):
         extensions = [
             # interfaces must go first
             'pullsync.ext.interfaces',
+            'pullsync.ext.ext_google',
             'pullsync.ext.ext_longbox',
             'pullsync.ext.ext_pulldb',
             'pullsync.ext.ext_redis',
@@ -55,8 +56,8 @@ class PulldbTest(test.CementTestCase):
         MockRedis._load_longbox_data(datafile('new_stored.json'))
         with open(datafile('new.json')) as new_file:
             new_pulls = json.load(new_file)
-        self.app.pulldb.fetch_new = mock.Mock(return_value=new_pulls)
-        self.app.longbox._http = HttpMockSequence([
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('fetch_new.json')).read()),
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1000.json')).read()),
             ({'status': 200}, open(datafile('storage.json')).read()),
@@ -69,6 +70,36 @@ class PulldbTest(test.CementTestCase):
             ({'status': 200}, open(datafile('storage_1004.json')).read()),
         ])
         self.app.longbox.scan(new=True)
+        self.assertIn(
+            call('gs:seen', 1001), self.app.redis.client.sadd.call_args_list)
+        self.assertIn(
+            call('gs:seen', 1002), self.app.redis.client.sadd.call_args_list)
+        self.assertNotIn(
+            call('gs:seen', 1003), self.app.redis.client.sadd.call_args_list)
+        self.assertNotIn(
+            call('gs:seen', 1004), self.app.redis.client.sadd.call_args_list)
+
+    def scan_unread_test(self):
+        self.app.setup()
+        self.app.redis.client = MockRedis()
+        MockRedis._load_pull_data(datafile('list_unread.json'))
+        MockRedis._load_longbox_data(datafile('new_stored.json'))
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('fetch_unread.json')).read()),
+        ])
+        self.app.longbox._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1000.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1001.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1002.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1003.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1004.json')).read()),
+        ])
+        self.app.longbox.scan(new=False)
         self.assertIn(
             call('gs:seen', 1001), self.app.redis.client.sadd.call_args_list)
         self.assertIn(

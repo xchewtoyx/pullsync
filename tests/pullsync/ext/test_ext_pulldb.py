@@ -52,12 +52,12 @@ class PulldbTest(test.CementTestCase):
         with open(os.path.join(TEST_DATA_DIR, 'fetch_new.json')) as json_file:
             unread = json.load(json_file)
         self.app.pulldb.fetch_page = mock.Mock(return_value=unread)
-        self.assertEqual(len(unread['results']), 39)
+        self.assertEqual(len(unread['results']), 5)
         results = self.app.pulldb.fetch_new()
         self.app.pulldb.fetch_page.assert_called_with(
             '/api/pulls/list/new', cursor=None, cache=False
         )
-        self.assertEqual(len(results), 39)
+        self.assertEqual(len(results), 5)
         for pull in results:
             self.assertTrue('issue_id' in pull)
 
