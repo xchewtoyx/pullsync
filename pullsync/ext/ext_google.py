@@ -26,6 +26,7 @@ class GoogleHandler(handler.CementBaseHandler):
         app.log.debug('Setting up google api client')
         super(GoogleHandler, self)._setup(app)
         self.app.extend('google', self)
+        self._http = None
 
     @property
     def client_secrets(self):
@@ -50,20 +51,22 @@ class GoogleHandler(handler.CementBaseHandler):
 
     @property
     def client(self):
-        http_client = httplib2.Http()
-        credentials = self.credential_store.get()
-        if not credentials or credentials.invalid:
-            self.app.log.debug('No valid credentials, authorizing...')
-            flow = client.OAuth2WebServerFlow(
-                client_id=self.client_secrets['client_id'],
-                client_secret=self.client_secrets['client_secret'],
-                scope=self.Meta.scope,
-                user_agent=self.Meta.user_agent,
-                redirect_url="urn:ietf:wg:oauth:2.0:oob",
-            )
-            tools.run_flow(flow, self.credential_store, self.app.pargs)
-        self.credential_store.get().authorize(http_client)
-        return http_client
+        if not self._http:
+            http_client = httplib2.Http()
+            credentials = self.credential_store.get()
+            if not credentials or credentials.invalid:
+                self.app.log.debug('No valid credentials, authorizing...')
+                flow = client.OAuth2WebServerFlow(
+                    client_id=self.client_secrets['client_id'],
+                    client_secret=self.client_secrets['client_secret'],
+                    scope=self.Meta.scope,
+                    user_agent=self.Meta.user_agent,
+                    redirect_url="urn:ietf:wg:oauth:2.0:oob",
+                )
+                tools.run_flow(flow, self.credential_store, self.app.pargs)
+            self.credential_store.get().authorize(http_client)
+            self._http = http_client
+        return self._http
 
 
 def load_google_args(app):

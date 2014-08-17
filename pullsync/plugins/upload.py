@@ -77,6 +77,21 @@ class UploadController(controller.CementBaseController):
         issue_number = re.search(r'(\d+|)$', normal).group(1)
         return normal, issue_number
 
+    def commit_file(self, best_match, candidate):
+        pull_id = int(best_match['identifier'])
+        detail = self.app.longbox.check_prefix(pull_id)
+        if detail:
+            self.app.log.info('Pull %d has already been uploaded, skipping' % (
+                pull_id,))
+        else:
+            try:
+                self.send_file(candidate, best_match)
+            except subprocess.CalledProcessError as error:
+                self.app.log.error('Error copying file: %r' % error)
+            else:
+                self.app.longbox.check_prefix(pull_id)
+                self.app.pulldb.pull_new(pull_id)
+
     def compare_pull(self, candidate, pulls):
         candidate_name, candidate_issue = candidate[0]
         for pull in pulls:
@@ -164,17 +179,7 @@ class UploadController(controller.CementBaseController):
                 )
             )
             if good_match and self.app.pargs.commit:
-                pull_id = int(best_match[2]['identifier'])
-                detail = self.app.longbox.check_prefix(pull_id)
-                if detail:
-                    self.app.log.info(
-                        'Pull %d has already been uploaded, skipping' % (
-                            pull_id,))
-                    continue
-                try:
-                    self.send_file(candidate, best_match[2])
-                except subprocess.CalledProcessError as error:
-                    self.app.log.error('Error copying file: %r' % error)
+                self.commit_file(best_match[2], candidate)
 
 
 def load():

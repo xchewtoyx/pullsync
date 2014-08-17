@@ -1,0 +1,156 @@
+{
+  "449623": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/57/dc/6dc57/The Field 01 (of 04) (2014) (Digital) (JK-Empire).cbr",
+    "contentLanguage": "en",
+    "generation": "1408145935963000",
+    "md5Hash": "eOjYd4CY9ceez7BrZ7hfcA==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:38:55.830Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "We5VSw==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F57%2Fdc%2F6dc57%2FThe%20Field%2001%20(of%2004)%20(2014)%20(Digital)%20(JK-Empire).cbr?generation=1408145935963000&alt=media",
+    "etag": "CPimuLK4lsACEAE=",
+    "id": "long-box/comics/57/dc/6dc57/The Field 01 (of 04) (2014) (Digital) (JK-Empire).cbr/1408145935963000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F57%2Fdc%2F6dc57%2FThe%20Field%2001%20(of%2004)%20(2014)%20(Digital)%20(JK-Empire).cbr",
+    "size": "43499028"
+  },
+  "452883": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/13/e9/6e913/The Field 02 (of 04) (2014) (Digital-Empire).cbr",
+    "contentLanguage": "en",
+    "generation": "1408145944057000",
+    "md5Hash": "T76G31Trzr/wkSgjTZJl9A==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:39:03.960Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "lkc+/g==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F13%2Fe9%2F6e913%2FThe%20Field%2002%20(of%2004)%20(2014)%20(Digital-Empire).cbr?generation=1408145944057000&alt=media",
+    "etag": "CKippra4lsACEAE=",
+    "id": "long-box/comics/13/e9/6e913/The Field 02 (of 04) (2014) (Digital-Empire).cbr/1408145944057000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F13%2Fe9%2F6e913%2FThe%20Field%2002%20(of%2004)%20(2014)%20(Digital-Empire).cbr",
+    "size": "53062857"
+  },
+  "458652": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/9c/ff/6ff9c/The Field 003 (2014) (Digital-Empire).cbr",
+    "contentLanguage": "en",
+    "generation": "1408145940135000",
+    "md5Hash": "pBoIeL6vvwqhT55PVEqCQA==",
+    "bucket": "long-box",
+    "updated": "2014-08-15T23:38:59.916Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "GlNDDQ==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F9c%2Fff%2F6ff9c%2FThe%20Field%20003%20(2014)%20(Digital-Empire).cbr?generation=1408145940135000&alt=media",
+    "etag": "CNj4trS4lsACEAE=",
+    "id": "long-box/comics/9c/ff/6ff9c/The Field 003 (2014) (Digital-Empire).cbr/1408145940135000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F9c%2Fff%2F6ff9c%2FThe%20Field%20003%20(2014)%20(Digital-Empire).cbr",
+    "size": "51161591"
+  },
+  "461064": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/08/09/70908/Harley Quinn 008 (2014) (Digital) (Nahga-Empire).cbr",
+    "contentLanguage": "en",
+    "generation": "1408057957591000",
+    "md5Hash": "trSvCt1qNmtXTR+veQIWRA==",
+    "bucket": "long-box",
+    "updated": "2014-08-14T23:12:37.496Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "VvvL6w==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F08%2F09%2F70908%2FHarley%20Quinn%20008%20(2014)%20(Digital)%20(Nahga-Empire).cbr?generation=1408057957591000&alt=media",
+    "etag": "CNjPitPwk8ACEAE=",
+    "id": "long-box/comics/08/09/70908/Harley Quinn 008 (2014) (Digital) (Nahga-Empire).cbr/1408057957591000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F08%2F09%2F70908%2FHarley%20Quinn%20008%20(2014)%20(Digital)%20(Nahga-Empire).cbr",
+    "size": "48955255"
+  },
+  "461065": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/09/09/70909/Justice League 32 (2014) (Webrip) (Two covers) (The Last Kryptonian-DCP).cbr",
+    "contentLanguage": "en",
+    "generation": "1408057968730000",
+    "md5Hash": "MKELiWlx2O+pL8KiRAbgIA==",
+    "bucket": "long-box",
+    "updated": "2014-08-14T23:12:48.626Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "QJk8cg==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F09%2F09%2F70909%2FJustice%20League%2032%20(2014)%20(Webrip)%20(Two%20covers)%20(The%20Last%20Kryptonian-DCP).cbr?generation=1408057968730000&alt=media",
+    "etag": "CJC/stjwk8ACEAE=",
+    "id": "long-box/comics/09/09/70909/Justice League 32 (2014) (Webrip) (Two covers) (The Last Kryptonian-DCP).cbr/1408057968730000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F09%2F09%2F70909%2FJustice%20League%2032%20(2014)%20(Webrip)%20(Two%20covers)%20(The%20Last%20Kryptonian-DCP).cbr",
+    "size": "34526231"
+  },
+  "462202": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/7a/0d/70d7a/Birds of Prey 034 (2014) (Webrip-DCP).cbr",
+    "contentLanguage": "en",
+    "generation": "1408057855781000",
+    "md5Hash": "wwR+z7P3ej3oOxGD1ywr4A==",
+    "bucket": "long-box",
+    "updated": "2014-08-14T23:10:55.466Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "NtnLzQ==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F7a%2F0d%2F70d7a%2FBirds%20of%20Prey%20034%20(2014)%20(Webrip-DCP).cbr?generation=1408057855781000&alt=media",
+    "etag": "CIjRxKLwk8ACEAE=",
+    "id": "long-box/comics/7a/0d/70d7a/Birds of Prey 034 (2014) (Webrip-DCP).cbr/1408057855781000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F7a%2F0d%2F70d7a%2FBirds%20of%20Prey%20034%20(2014)%20(Webrip-DCP).cbr",
+    "size": "51109954"
+  },
+  "462239": {
+    "kind": "storage#object",
+    "contentType": "application/x-cbr",
+    "name": "comics/7e/0d/70d7e/Harley Quinn 009 (2014) (Digital) (Nahga-Empire).cbr",
+    "contentLanguage": "en",
+    "generation": "1408057850809000",
+    "md5Hash": "IKLNQzQnOKAYHCW02PWY7A==",
+    "bucket": "long-box",
+    "updated": "2014-08-14T23:10:50.688Z",
+    "owner": {
+      "entityId": "00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0",
+      "entity": "user-00b4903a97466c544381e6d5e1c2128b6e714efde73d3729242cd3fac69423f0"
+    },
+    "crc32c": "IkgZ0w==",
+    "metageneration": "1",
+    "storageClass": "STANDARD",
+    "mediaLink": "https://www.googleapis.com/download/storage/v1/b/long-box/o/comics%2F7e%2F0d%2F70d7e%2FHarley%20Quinn%20009%20(2014)%20(Digital)%20(Nahga-Empire).cbr?generation=1408057850809000&alt=media",
+    "etag": "CKiVlaDwk8ACEAE=",
+    "id": "long-box/comics/7e/0d/70d7e/Harley Quinn 009 (2014) (Digital) (Nahga-Empire).cbr/1408057850809000",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/long-box/o/comics%2F7e%2F0d%2F70d7e%2FHarley%20Quinn%20009%20(2014)%20(Digital)%20(Nahga-Empire).cbr",
+    "size": "46463643"
+  }
+}

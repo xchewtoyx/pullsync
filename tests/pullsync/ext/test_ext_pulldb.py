@@ -2,11 +2,18 @@ import json
 import os
 import sys
 
+from apiclient.http import HttpMockSequence
 from cement.core import foundation, handler
 from cement.utils import test
 import mock
 
+from pullsync.ext.ext_pulldb import FetchError, UpdateError
+
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+
+def datafile(name):
+    return os.path.join(TEST_DATA_DIR, name)
 
 
 class TestApp(foundation.CementApp):
@@ -14,11 +21,12 @@ class TestApp(foundation.CementApp):
         label = 'pullsync'
         argv = []
         config_files = [
-            os.path.join(TEST_DATA_DIR, 'pulldb.conf')
+            datafile('pulldb.conf')
         ]
         extensions = [
             'pullsync.ext.interfaces',
-            'pullsync.ext.ext_pulldb'
+            'pullsync.ext.ext_google',
+            'pullsync.ext.ext_pulldb',
         ]
 
 
@@ -52,3 +60,21 @@ class PulldbTest(test.CementTestCase):
         self.assertEqual(len(results), 39)
         for pull in results:
             self.assertTrue('issue_id' in pull)
+
+    def pull_new_test(self):
+        self.app.setup()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 500}, "500 Server Error"),
+            ({'status': 200},
+             '{"status": 200, "results": {"failed": ["1000"]}}'),
+            ({'status': 200},
+             '{"status": 200, "results": {"updated": ["1000"]}}'),
+        ])
+        # The following calls should not trigger a refresh
+        self.app.pulldb.refresh_pull = mock.Mock(side_effect=AssertionError)
+        with self.assertRaises(UpdateError):
+            self.app.pulldb.pull_new(1000)
+        self.app.pulldb.pull_new(1000)
+        self.app.pulldb.refresh_pull = mock.Mock()
+        self.app.pulldb.pull_new(1000)
+        self.app.pulldb.refresh_pull.assert_called_once_with(1000)

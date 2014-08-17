@@ -2,11 +2,24 @@ import json
 import os
 import sys
 
+from apiclient.http import HttpMockSequence
 from cement.core import foundation, handler
 from cement.utils import test
 import mock
 
+from pullsync.plugins import upload
+
+from tests.mocks import MockRedis
+
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+
+def datafile(name):
+    return os.path.join(TEST_DATA_DIR, name)
+
+
+class ProcessError(Exception):
+    pass
 
 
 class TestApp(foundation.CementApp):
@@ -19,6 +32,8 @@ class TestApp(foundation.CementApp):
         extensions = [
             # interfaces must go first
             'pullsync.ext.interfaces',
+            'pullsync.ext.ext_google',
+            'pullsync.ext.ext_longbox',
             'pullsync.ext.ext_pulldb',
             'pullsync.ext.ext_redis',
         ]
@@ -45,7 +60,7 @@ class UploadPluginTest(test.CementTestCase):
         self.app.setup()
         plugin = handler.get('controller', 'upload')()
         plugin.app = self.app
-        with open(os.path.join(TEST_DATA_DIR, 'unread.json')) as json_file:
+        with open(datafile('unread.json')) as json_file:
             unread = json.load(json_file)
         test_keys = ["pull:%s" % p["identifier"] for p in unread]
         test_dict = {
@@ -69,8 +84,105 @@ class UploadPluginTest(test.CementTestCase):
         self.app.setup()
         plugin = handler.get('controller', 'upload')()
         plugin.app = self.app
-        with open(os.path.join(TEST_DATA_DIR, 'new.json')) as json_file:
-            unread = json.load(json_file)
-        self.app.pulldb.fetch_new = mock.Mock(return_value=unread)
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('fetch_new.json')).read()),
+        ])
         results = list(plugin.identify_unseen(check_type='new'))
-        self.assertEqual(len(results), 39)
+        self.assertEqual(len(results), 7)
+
+    def commit_file_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        self.app.redis.client = MockRedis()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1000.json')).read()),
+        ])
+        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        with open(datafile('pull_data_1000.json')) as pull_data:
+            best_match = json.load(pull_data)
+        # cases: unread pull, file exists
+        upload.subprocess.check_call = mock.Mock()
+        plugin.commit_file(best_match, candidate)
+        self.app.redis.client.sadd.assert_called_with('gs:seen', 1000)
+
+    def commit_file_nomatch_fail_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        self.app.redis.client = MockRedis()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
+        ])
+        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        with open(datafile('pull_data_1000.json')) as pull_data:
+            best_match = json.load(pull_data)
+        # cases: unread pull, no file, transfer fails
+        upload.subprocess.check_call = mock.Mock(side_effect=ProcessError)
+        with self.assertRaises(ProcessError):
+            plugin.commit_file(best_match, candidate)
+        assert not self.app.redis.client.sadd.called, (
+            'redis.client.sadd called unexpectedly')
+        assert not self.app.redis.client.set.called, (
+            'redis.client.set called unexpectedly')
+
+    def commit_file_nomatch_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        self.app.redis.client = MockRedis()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1000.json')).read()),
+            ({'status': 200}, open(datafile(
+                'pull_update_pull_1000.json')).read()),
+        ])
+        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        with open(datafile('pull_data_1000.json')) as pull_data:
+            best_match = json.load(pull_data)
+        # cases: unread pull, no file, transfer good
+        upload.subprocess.check_call = mock.Mock()
+        plugin.commit_file(best_match, candidate)
+        self.app.redis.client.sadd.assert_called_with('gs:seen', 1000)
+        self.assertNotIn('pull:1000', self.app.redis.client.additions)
+
+    def commit_new_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        self.app.redis.client = MockRedis()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1001.json')).read()),
+        ])
+        candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
+        with open(datafile('pull_data_1001.json')) as pull_data:
+            best_match = json.load(pull_data)
+        # cases: new pull, file exists
+        upload.subprocess.check_call = mock.Mock()
+        plugin.commit_file(best_match, candidate)
+        self.app.redis.client.sadd.assert_called_with('gs:seen', 1001)
+
+    def commit_new_nomatch_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        self.app.redis.client = MockRedis()
+        self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
+            ({'status': 200}, open(datafile('storage.json')).read()),
+            ({'status': 200}, open(datafile('storage_1001.json')).read()),
+            ({'status': 200}, open(datafile(
+                'pull_update_pull_1001.json')).read()),
+        ])
+        candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
+        with open(datafile('pull_data_1001.json')) as pull_data:
+            best_match = json.load(pull_data)
+        # cases: new pull, no file
+        upload.subprocess.check_call = mock.Mock()
+        plugin.commit_file(best_match, candidate)

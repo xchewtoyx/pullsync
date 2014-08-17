@@ -13,6 +13,10 @@ class FetchError(Exception):
     pass
 
 
+class UpdateError(Exception):
+    pass
+
+
 class PullDB(handler.CementBaseHandler):
     class Meta:
         interface = interfaces.DataInterface
@@ -105,6 +109,26 @@ class PullDB(handler.CementBaseHandler):
             if not self.app.redis.client.sismember(
                     'gs:seen', int(pull['id'])):
                 yield pull
+
+    def pull_new(self, pull_id):
+        path = '/api/pulls/update'
+        data = json.dumps({
+            'pull': [pull_id]
+        })
+        resp, content = self.app.google.client.request(
+            self.base_url + path,
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=data,
+        )
+        if resp.status != 200:
+            self.app.log.error(resp, content)
+            raise UpdateError('Unable to update pull %d' % pull_id)
+        result = json.loads(content)['results']
+        if str(pull_id) in result.get('updated', []):
+            self.refresh_pull(pull_id)
+        else:
+            self.app.log.warn('Unable to pull %d: %r' % (pull_id, result))
 
     def refresh_pull(self, pull_id, prefix='pull'):
         path = '/api/pulls/%d/get' % pull_id

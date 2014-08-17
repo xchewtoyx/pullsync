@@ -9,6 +9,7 @@ class MockRedis(mock.Mock):
     longbox_data = None
     seen_keys = []
     seen_dict = []
+    additions = {}
 
     @classmethod
     def _load_pull_data(cls, test_data_filename):
@@ -30,7 +31,12 @@ class MockRedis(mock.Mock):
             cls.longbox_data.items()
         }
 
+    @classmethod
+    def reset_additions(cls):
+        cls.additions = {}
+
     fetch_unread = mock.Mock(side_effect=lambda: MockRedis.pull_data)
     get = mock.Mock(side_effect=lambda k: MockRedis.pull_dict.get(k))
     keys = mock.Mock(side_effect=lambda k: MockRedis.pull_keys)
+    set = mock.Mock(side_effect=lambda k, v: MockRedis.additions.add(k, v))
     sismember = mock.Mock(side_effect=lambda s, k: k in MockRedis.seen_keys)
