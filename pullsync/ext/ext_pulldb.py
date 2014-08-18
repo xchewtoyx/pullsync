@@ -112,9 +112,10 @@ class PullDB(handler.CementBaseHandler):
                 yield pull
 
     def pull_new(self, pull_id):
+        pull_identifier = str(pull_id)
         path = '/api/pulls/update'
         data = json.dumps({
-            'pull': [pull_id]
+            'pull': [pull_identifier]
         })
         self.app.log.info('Sending request for: %r' % path)
         resp, content = self.app.google.client.request(
@@ -127,7 +128,7 @@ class PullDB(handler.CementBaseHandler):
             self.app.log.error(resp, content)
             raise UpdateError('Unable to update pull %d' % pull_id)
         result = json.loads(content)['results']
-        if str(pull_id) in result.get('updated', []):
+        if pull_identifier in result.get('updated', []):
             self.refresh_pull(pull_id)
         else:
             self.app.log.warn('Unable to pull %d: %r' % (pull_id, result))

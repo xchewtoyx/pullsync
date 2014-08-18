@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-from apiclient.http import HttpMockSequence
+from apiclient.http import HttpMock, HttpMockSequence
 from cement.core import foundation, handler
 from cement.utils import test
 import mock
@@ -78,3 +78,20 @@ class PulldbTest(test.CementTestCase):
         self.app.pulldb.refresh_pull = mock.Mock()
         self.app.pulldb.pull_new(1000)
         self.app.pulldb.refresh_pull.assert_called_once_with(1000)
+
+    def pull_new_arg_test(self):
+        self.app.setup()
+        self.app.pulldb.refresh_pull = mock.Mock(return_value=[])
+        http_mock = mock.Mock()
+        http_mock.request = mock.Mock(
+            side_effect=HttpMock(datafile('pull_update_pull_1000.json'),
+                                 headers={'status': 200}).request)
+        self.app.google._http = http_mock
+        with self.assertRaises(TypeError):
+            self.app.pulldb.pull_new(None)
+        self.app.pulldb.pull_new(1000)
+        self.app.pulldb.refresh_pull.assert_called_with(1000)
+        request_args = self.app.google._http.request.call_args
+        print list(request_args)
+        data = json.loads(request_args[1]['body'])
+        self.assertEqual(data['pull'][0], "1000")
