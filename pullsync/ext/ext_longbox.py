@@ -151,6 +151,8 @@ class Longbox(controller.CementBaseController):
             if pull_matches:
                 self.app.log.debug('File found for [%s] %s' % (
                     pull_detail['identifier'], pull_detail['name']))
+                if new:
+                    self.app.pulldb.pull_new(pull_id)
                 for item in pull_matches:
                     print item['name']
             else:

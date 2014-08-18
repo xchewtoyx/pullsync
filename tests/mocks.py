@@ -43,4 +43,5 @@ class MockRedis(mock.Mock):
     get = mock.Mock(side_effect=lambda k: MockRedis.pull_dict.get(k))
     keys = mock.Mock(side_effect=lambda k: MockRedis.pull_keys)
     set = mock.Mock(side_effect=lambda k, v: MockRedis._set(k, v))
+    setex = mock.Mock(side_effect=lambda k, t, v: MockRedis._set(k, v))
     sismember = mock.Mock(side_effect=lambda s, k: k in MockRedis.seen_keys)
