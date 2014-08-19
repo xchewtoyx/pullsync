@@ -6,6 +6,7 @@ import time
 from cement.core import controller, handler
 from dateutil.parser import parse as parse_date
 
+
 class SyncController(controller.CementBaseController):
     class Meta:
         label = 'sync'
@@ -24,9 +25,10 @@ class SyncController(controller.CementBaseController):
             }),
             (['--strict'], {
                 'help': (
-                    'Remove any files not in the sync set, even if unread. '
-                    'This will reduce the storage used in the sync destination '
-                    'at the expense of additional network traffic.'
+                    'Remove any files not in the sync set, even if '
+                    'unread. This will reduce the storage used in the '
+                    'sync destination at the expense of additional '
+                    'network traffic.'
                 ),
                 'action': 'store_true',
             }),
@@ -35,8 +37,7 @@ class SyncController(controller.CementBaseController):
     def weighted_pulls(self):
         new_items = self.app.pulldb.list_unread()
         for pull in new_items:
-            pull_detail = json.loads(self.app.redis.get(pull))
-            yield float(pull_detail['weight']), pull, pull_detail
+            yield float(pull['weight']), pull['id'], pull
 
     def exportable_items(self):
         count = 0
@@ -55,24 +56,21 @@ class SyncController(controller.CementBaseController):
                 self.app.log.info(
                     'Skipping pull %s(%s), pull has no stream.' % (
                         pull_detail['name'],
-                        pull_detail['identifier'],
-                ))
+                        pull_detail['identifier'],))
                 continue
             if pull_detail['stream_id'] in stalled_streams:
                 self.app.log.warn(
                     'Skipping pull %s(%s), stream %s stalled' % (
                         pull_detail['name'],
                         pull_detail['identifier'],
-                        pull_detail['stream_id']
-                ))
+                        pull_detail['stream_id']))
                 continue
             if not self.app.longbox.check_prefix(pull_id):
                 self.app.log.warn(
                     'Issue %s(%s) not in longbox.  Stalling stream %s.' % (
                         pull_detail['name'],
                         pull_detail['identifier'],
-                        pull_detail['stream_id']
-                ))
+                        pull_detail['stream_id']))
                 stalled_streams.add(pull_detail['stream_id'])
                 continue
             yield pull_detail
@@ -161,6 +159,7 @@ class SyncController(controller.CementBaseController):
 
         if expired_pulls:
             self.expire_pulls(self.app.pargs.destination, expired_pulls)
+
 
 def load():
     handler.register(SyncController)
