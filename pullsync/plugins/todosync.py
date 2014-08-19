@@ -52,13 +52,12 @@ class TodoSync(controller.CementBaseController):
 
     def weighted_pulls(self):
         new_items = self.app.pulldb.list_unread()
-        for pull in new_items:
-            pull_detail = json.loads(self.app.redis.get(pull))
+        for pull_detail in new_items:
             if not pull_detail.get('stream_id'):
                 weight = 2.0
             else:
                 weight = float(pull_detail['weight'])
-            yield weight, pull, pull_detail
+            yield weight, pull_detail['id'], pull_detail
 
     def write_todo_file(self, entries):
         backup_name = '%s.%s' % (
