@@ -96,6 +96,12 @@ class UploadPluginTest(test.CementTestCase):
         plugin.app = self.app
         self.app.redis.client = MockRedis()
         self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile(
+                'pull_update_pull_1000.json')).read()),
+            ({'status': 200}, open(
+                datafile('pull_fetch_1000.json')).read()),
+        ])
+        self.app.longbox._http = HttpMockSequence([
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1000.json')).read()),
         ])
@@ -112,7 +118,7 @@ class UploadPluginTest(test.CementTestCase):
         plugin = handler.get('controller', 'upload')()
         plugin.app = self.app
         self.app.redis.client = MockRedis()
-        self.app.google._http = HttpMockSequence([
+        self.app.longbox._http = HttpMockSequence([
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
         ])
@@ -136,19 +142,25 @@ class UploadPluginTest(test.CementTestCase):
         plugin.app = self.app
         self.app.redis.client = MockRedis()
         self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(datafile(
+                'pull_update_pull_1000.json')).read()),
+            ({'status': 200}, open(
+                datafile('pull_fetch_1000.json')).read()),
+        ])
+        self.app.longbox._http = HttpMockSequence([
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1000.json')).read()),
-            ({'status': 200}, open(datafile(
-                'pull_update_pull_1000.json')).read()),
         ])
         candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
         with open(datafile('pull_data_1000.json')) as pull_data:
             best_match = json.load(pull_data)
+
         # cases: unread pull, no file, transfer good
         upload.subprocess.check_call = mock.Mock()
         plugin.commit_file(best_match, candidate)
+
         self.app.redis.client.sadd.assert_called_with('gs:seen', 1000)
         self.assertNotIn('pull:1000', self.app.redis.client.additions)
 
@@ -160,6 +172,10 @@ class UploadPluginTest(test.CementTestCase):
         self.app.google._http = HttpMockSequence([
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1001.json')).read()),
+            ({'status': 200}, open(
+                datafile('pull_update_pull_1001.json')).read()),
+            ({'status': 200}, open(
+                datafile('pull_fetch_1001.json')).read()),
         ])
         candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
         with open(datafile('pull_data_1001.json')) as pull_data:
@@ -168,6 +184,7 @@ class UploadPluginTest(test.CementTestCase):
         upload.subprocess.check_call = mock.Mock()
         plugin.commit_file(best_match, candidate)
         self.app.redis.client.sadd.assert_called_with('gs:seen', 1001)
+        self.assertIn('pull:1001', self.app.redis.client.additions)
 
     def commit_new_nomatch_test(self):
         self.app.setup()
@@ -175,12 +192,16 @@ class UploadPluginTest(test.CementTestCase):
         plugin.app = self.app
         self.app.redis.client = MockRedis()
         self.app.google._http = HttpMockSequence([
+            ({'status': 200}, open(
+                datafile('pull_update_pull_1001.json')).read()),
+            ({'status': 200}, open(
+                datafile('pull_fetch_1001.json')).read()),
+        ])
+        self.app.longbox._http = HttpMockSequence([
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1001.json')).read()),
-            ({'status': 200}, open(datafile(
-                'pull_update_pull_1001.json')).read()),
         ])
         candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
         with open(datafile('pull_data_1001.json')) as pull_data:

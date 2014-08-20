@@ -77,10 +77,16 @@ class UploadController(controller.CementBaseController):
         issue_number = re.search(r'(\d+|)$', normal).group(1)
         return normal, issue_number
 
+    def _pull_if_new(self, best_match):
+        pull_id = int(best_match['identifier'])
+        if best_match['pulled'] == 'False':
+            self.app.pulldb.pull_new(pull_id)
+
     def commit_file(self, best_match, candidate):
         pull_id = int(best_match['identifier'])
         detail = self.app.longbox.check_prefix(pull_id)
         if detail:
+            self._pull_if_new(best_match)
             self.app.log.info('Pull %d has already been uploaded, skipping' % (
                 pull_id,))
         else:
@@ -90,7 +96,7 @@ class UploadController(controller.CementBaseController):
                 self.app.log.error('Error copying file: %r' % error)
             else:
                 self.app.longbox.check_prefix(pull_id)
-                self.app.pulldb.pull_new(pull_id)
+                self._pull_if_new(best_match)
 
     def compare_pull(self, candidate, pulls):
         candidate_name, candidate_issue = candidate[0]
