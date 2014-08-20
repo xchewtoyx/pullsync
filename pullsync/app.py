@@ -21,6 +21,7 @@ class PullsyncApp(foundation.CementApp):
             'pullsync.ext.interfaces',
             'pullsync.ext.ext_google',
             'pullsync.ext.ext_longbox',
+            'pullsync.ext.ext_matcher',
             'pullsync.ext.ext_pulldb',
             'pullsync.ext.ext_redis',
         ]

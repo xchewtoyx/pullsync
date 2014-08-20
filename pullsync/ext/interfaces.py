@@ -17,6 +17,14 @@ class DataInterface(interface.Interface):
         pass
 
 
+class MatchInterface(interface.Interface):
+    class IMeta:
+        label = 'matcher'
+
+    def _setup(app):
+        pass
+
+
 class PullsInterface(interface.Interface):
     class IMeta:
         label = 'pulls'
@@ -36,5 +44,6 @@ class ReadinglistInterface(interface.Interface):
 def load():
     handler.define(AuthInterface)
     handler.define(DataInterface)
+    handler.define(MatchInterface)
     handler.define(PullsInterface)
     handler.define(ReadinglistInterface)

@@ -34,6 +34,7 @@ class TestApp(foundation.CementApp):
             'pullsync.ext.interfaces',
             'pullsync.ext.ext_google',
             'pullsync.ext.ext_longbox',
+            'pullsync.ext.ext_matcher',
             'pullsync.ext.ext_pulldb',
             'pullsync.ext.ext_redis',
         ]
@@ -47,14 +48,6 @@ class UploadPluginTest(test.CementTestCase):
         self.app.setup()
         self.assertIn('upload', self.app.plugin._loaded_plugins)
         self.assertIn('upload', self.app.plugin.get_enabled_plugins())
-
-    def normalise_name_test(self):
-        self.app.setup()
-        plugin = handler.get('controller', 'upload')()
-        self.assertEqual(
-            plugin.normalise_name('The Walking Dead #012 (2014)'),
-            ('the walking dead #12', '12'),
-        )
 
     def check_unseen_test(self):
         self.app.setup()
@@ -209,3 +202,35 @@ class UploadPluginTest(test.CementTestCase):
         # cases: new pull, no file
         upload.subprocess.check_call = mock.Mock()
         plugin.commit_file(best_match, candidate)
+
+    def scan_dir_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+
+        data_files = [
+            'Test Issue 1 (2014).cbr',
+            'Test Issue 2 (2014).cbr',
+            'Test Issue 3 (2014).cbr',
+            'Test Issue 4 (2014).cbr',
+            'Test Issue 5 (2014).cbr',
+        ]
+        for path, filename in plugin.scan_dir(datafile('scan_test')):
+            self.assertIn(filename, data_files)
+
+    def find_matches_test(self):
+        self.app.setup()
+        plugin = handler.get('controller', 'upload')()
+        plugin.app = self.app
+        candidates = [
+            ('.', 'Test Issue 1 (2014).cbr'),
+            ('.', 'Test Issue 2 (2014).cbr'),
+            ('.', 'Test Issue 3 (2014).cbr'),
+            ('.', 'Test Issue 4 (2014).cbr'),
+            ('.', 'Test Issue 5 (2014).cbr'),
+        ]
+        results = json.load(open(datafile('fetch_new.json')))
+        pulls = [entry['pull'] for entry in results['results']]
+        for good_match, best_match, candidate in plugin.find_matches(
+                candidates, pulls, 0.25):
+            self.assertFalse(good_match)
