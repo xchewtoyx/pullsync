@@ -1,8 +1,9 @@
 cement
 httplib2
-python-Levenshtein
 google-api-python-client
-pyxdg
-python-dateutil
-redis
 hiredis
+python-coveralls
+python-dateutil
+python-Levenshtein
+pyxdg
+redis
