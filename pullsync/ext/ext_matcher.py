@@ -49,6 +49,8 @@ class MatchHandler(handler.CementBaseHandler):
         normal = re.sub(r' +', ' ', normal)
         normal = normal.strip()
         # Fixup issue numbers
+        # Rewrite unicode half to 0.5
+        normal = re.sub(u'\xbd', r'0.5', normal)
         # Remove random issue suffixes that Marvel seem to like
         normal = re.sub(r'([.\d]+)(?:\.now)$', r'\g<1>', normal)
         # Strip leading zeroes from issue number
