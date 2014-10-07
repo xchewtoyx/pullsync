@@ -38,6 +38,7 @@ class MatchHandler(handler.CementBaseHandler):
         normal = re.sub(r'garth ennis\'?', '', normal)
         normal = re.sub(r'george romero\'?s', '', normal)
         normal = re.sub(r'(outcast) by kirkman & azaceta', r'\g<1>', normal)
+        normal = re.sub(r'the blood queen', r'blood queen', normal)
         normal = re.sub(r'the black bat', r'black bat', normal)
         normal = re.sub(r'the devilers', r'devilers', normal)
         normal = re.sub(r'robin rises omega', r'robin rises', normal)
