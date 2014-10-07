@@ -1,3 +1,4 @@
+import codecs
 from contextlib import contextmanager
 import json
 import os
@@ -29,7 +30,7 @@ class TodoSync(controller.CementBaseController):
     def read_todo_file(self):
         todofile = self.app.pargs.todo
         id_pattern = re.compile(r'\[(\d+)\]')
-        with open(todofile, 'r') as todo_list:
+        with codecs.open(todofile, 'r', 'utf-8') as todo_list:
             for line in todo_list:
                 match = id_pattern.search(line)
                 if match:
@@ -65,7 +66,7 @@ class TodoSync(controller.CementBaseController):
             time.time(),
         )
         os.rename(self.app.pargs.todo, backup_name)
-        with open(self.app.pargs.todo, 'w') as todo_file:
+        with codecs.open(self.app.pargs.todo, 'w', 'utf-8') as todo_file:
             todo_file.write('\n'.join(entries))
 
     @controller.expose(hide=True)
