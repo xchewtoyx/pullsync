@@ -75,7 +75,7 @@ class UploadController(controller.CementBaseController):
 
     def send_file(self, candidate, pull):
         filename = os.path.join(
-            candidate[1], candidate[2]
+            candidate[0], candidate[1]
         )
         pull_id = int(pull['identifier'])
         destination = 'gs://long-box/comics/%02x/%02x/%x/' % (
