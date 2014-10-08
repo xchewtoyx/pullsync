@@ -89,7 +89,7 @@ class Longbox(controller.CementBaseController):
         )
 
         # The BytesIO object may be replaced with any io.Base instance.
-        fh = io.FileIO(destination, 'w')
+        fh = io.FileIO(destination.encode('utf-8'), 'w')
         downloader = apiclient.http.MediaIoBaseDownload(
             fh, req, chunksize=1024*1024)
         done = False
