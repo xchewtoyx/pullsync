@@ -41,7 +41,7 @@ class ReadinglistInterface(interface.Interface):
         pass
 
 
-def load():
+def load(app=None):
     handler.define(AuthInterface)
     handler.define(DataInterface)
     handler.define(MatchInterface)

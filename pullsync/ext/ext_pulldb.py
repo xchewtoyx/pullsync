@@ -165,7 +165,7 @@ class FetchPulls(controller.CementBaseController):
         self.app.pulldb.refresh_unread()
 
 
-def load():
+def load(app=None):
     handler.register(FetchPulls)
     pulldb = PullDB()
     hook.register('post_setup', pulldb._setup)

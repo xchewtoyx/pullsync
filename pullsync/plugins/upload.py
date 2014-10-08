@@ -121,5 +121,5 @@ class UploadController(controller.CementBaseController):
                 self.commit_file(best_match[2], candidate)
 
 
-def load():
+def load(app=None):
     handler.register(UploadController)

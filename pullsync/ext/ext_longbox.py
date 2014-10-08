@@ -185,7 +185,7 @@ class ScanController(controller.CementBaseController):
             self.app.longbox.refresh()
 
 
-def load():
+def load(app=None):
     handler.register(ScanController)
     longbox = Longbox()
     hook.register('post_setup', longbox._setup)

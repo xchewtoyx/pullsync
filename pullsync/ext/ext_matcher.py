@@ -94,6 +94,6 @@ class MatchHandler(handler.CementBaseHandler):
             )
 
 
-def load():
+def load(app=None):
     handler.register(MatchHandler)
     hook.register('post_setup', MatchHandler()._setup)

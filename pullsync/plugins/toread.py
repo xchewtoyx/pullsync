@@ -51,5 +51,5 @@ class ToRead(controller.CementBaseController):
             pass
 
 
-def load():
+def load(app=None):
     handler.register(ToRead)

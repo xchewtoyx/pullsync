@@ -161,5 +161,5 @@ class SyncController(controller.CementBaseController):
             self.expire_pulls(self.app.pargs.destination, expired_pulls)
 
 
-def load():
+def load(app=None):
     handler.register(SyncController)

@@ -40,7 +40,7 @@ class RedisCache(handler.CementBaseHandler):
                 pipe.execute()
 
 
-def load():
+def load(app=None):
     redis_handler = RedisCache()
     hook.register('post_setup', redis_handler._setup)
     hook.register('post_argument_parsing', redis_handler._register_client)

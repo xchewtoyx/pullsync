@@ -99,5 +99,5 @@ class TodoSync(controller.CementBaseController):
             new_entries.extend(extra)
             self.write_todo_file(new_entries)
 
-def load():
+def load(app=None):
     handler.register(TodoSync)
