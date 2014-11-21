@@ -26,7 +26,12 @@ class ToRead(controller.CementBaseController):
             new_items = self.app.pulldb.list_unread()
         for pull_detail in new_items:
             pull = 'pull:%s' % pull_detail['identifier']
-            yield float(pull_detail['weight']), pull, pull_detail
+            try:
+                weight = float(pull_detail['weight'])
+            except ValueError:
+                # if weight is not defined, treat as 1.0
+                weight = 1.0
+            yield weight, pull, pull_detail
 
     @controller.expose(hide=True)
     def default(self):
@@ -39,7 +44,7 @@ class ToRead(controller.CementBaseController):
                 else:
                     note = ' '
                 print '%07.0f%s %6d [%8.8s] %s %s' % (
-                    float(pull['weight']) * 1e6,
+                    weight * 1e6,
                     note,
                     pull_id,
                     pull.get('stream_id'),
