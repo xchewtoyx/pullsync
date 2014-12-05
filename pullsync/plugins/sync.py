@@ -47,6 +47,7 @@ class SyncController(controller.CementBaseController):
                 break
             pull_id = int(pull_detail['identifier'])
             pull_detail = self.app.pulldb.refresh_pull(pull_id)
+            self.app.log.debug('Checking pull %d' % pull_id)
             if pull_detail['read'] == 'True':
                 self.app.log.debug(
                     'Issue %d is no longer unread, skipping' % pull_id

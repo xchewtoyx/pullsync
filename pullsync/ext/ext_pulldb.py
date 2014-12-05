@@ -142,6 +142,9 @@ class PullDB(handler.CementBaseHandler):
             raise FetchError('Unable to fetch pull %d' % pull_id)
         else:
             response = json.loads(content)
+            if len(response['results']) > 1:
+                self.app.log.warn(
+                    'Multiple results in data store for pull id %d' % pull_id)
             for pull in response['results']:
                 key = '%s:%s' % (prefix, pull['pull']['id'])
                 if pull['pull']['read'] == 'True':
