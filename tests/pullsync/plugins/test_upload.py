@@ -98,7 +98,7 @@ class UploadPluginTest(test.CementTestCase):
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1000.json')).read()),
         ])
-        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        candidate = ('.', 'Test Issue 1 (2014).cbr')
         with open(datafile('pull_data_1000.json')) as pull_data:
             best_match = json.load(pull_data)
         # cases: unread pull, file exists
@@ -115,7 +115,7 @@ class UploadPluginTest(test.CementTestCase):
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_nomatch.json')).read()),
         ])
-        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        candidate = ('.', 'Test Issue 1 (2014).cbr')
         with open(datafile('pull_data_1000.json')) as pull_data:
             best_match = json.load(pull_data)
         # cases: unread pull, no file, transfer fails
@@ -146,7 +146,7 @@ class UploadPluginTest(test.CementTestCase):
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1000.json')).read()),
         ])
-        candidate = (('test issue 1', 1), '.', 'Test Issue 1 (2014).cbr')
+        candidate = ('.', 'Test Issue 1 (2014).cbr')
         with open(datafile('pull_data_1000.json')) as pull_data:
             best_match = json.load(pull_data)
 
@@ -170,7 +170,7 @@ class UploadPluginTest(test.CementTestCase):
             ({'status': 200}, open(
                 datafile('pull_fetch_1001.json')).read()),
         ])
-        candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
+        candidate = ('.', 'Test Issue 2 (2014).cbr')
         with open(datafile('pull_data_1001.json')) as pull_data:
             best_match = json.load(pull_data)
         # cases: new pull, file exists
@@ -196,7 +196,7 @@ class UploadPluginTest(test.CementTestCase):
             ({'status': 200}, open(datafile('storage.json')).read()),
             ({'status': 200}, open(datafile('storage_1001.json')).read()),
         ])
-        candidate = (('test issue 2', 2), '.', 'Test Issue 2 (2014).cbr')
+        candidate = ('.', 'Test Issue 2 (2014).cbr')
         with open(datafile('pull_data_1001.json')) as pull_data:
             best_match = json.load(pull_data)
         # cases: new pull, no file
