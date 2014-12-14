@@ -74,6 +74,7 @@ class UploadController(controller.CementBaseController):
             yield pull
 
     def send_file(self, candidate, pull):
+        self.app.log.debug('Sending file [%r, %r]' % (candidate, pull))
         filename = os.path.join(
             candidate[0], candidate[1]
         )
