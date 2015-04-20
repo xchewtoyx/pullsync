@@ -23,7 +23,7 @@ class TestApp(foundation.CementApp):
         argv = []
         config_defaults = {
             'pulldb': {'base_url': None},
-            'todosync': {'enable_plugin': True},
+            'todo': {'enable_plugin': True},
         }
         extensions = [
             # interfaces must go first
@@ -36,17 +36,17 @@ class TestApp(foundation.CementApp):
         plugin_bootstrap = 'pullsync.plugins'
 
 
-class TodoSyncPluginTest(test.CementTestCase):
+class TodoPluginTest(test.CementTestCase):
     app_class = TestApp
 
     def load_plugin_test(self):
         self.app.setup()
-        self.assertIn('todosync', self.app.plugin._loaded_plugins)
-        self.assertIn('todosync', self.app.plugin.get_enabled_plugins())
+        self.assertIn('todo', self.app.plugin._loaded_plugins)
+        self.assertIn('todo', self.app.plugin.get_enabled_plugins())
 
     def load_controller_test(self):
         self.app.setup()
-        toread = handler.get('controller', 'todosync')()
+        toread = handler.get('controller', 'todo')()
 
     def fetch_weighted_pulls_test(self):
         self.app.setup()
@@ -54,7 +54,7 @@ class TodoSyncPluginTest(test.CementTestCase):
         redis_mock = MockRedis()
         redis_mock._load_pull_data(datafile('sync_unread.json'))
         self.app.redis.client = redis_mock
-        sync_handler = handler.get('controller', 'todosync')()
+        sync_handler = handler.get('controller', 'todo')()
         sync_handler.app = self.app
         for pull_tuple in sync_handler.weighted_pulls():
             self.assertIsInstance(pull_tuple, tuple)
