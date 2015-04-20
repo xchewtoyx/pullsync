@@ -133,6 +133,30 @@ class PullDB(handler.CementBaseHandler):
         else:
             self.app.log.warn('Unable to pull %d: %r' % (pull_id, result))
 
+    def pull_read(self, pull_ids):
+        pulls = [str(pull_id) for pull_id in pull_ids]
+        path = '/api/pulls/update'
+        data = json.dumps({
+            'read': pulls
+        })
+        self.app.log.info('Sending request for: %r[%r]' % (path, data))
+        resp, content = self.app.google.client.request(
+            self.base_url + path,
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=data,
+        )
+        if resp.status != 200:
+            self.app.log.error(resp, content)
+            raise UpdateError('Unable to update pulls %r' % pull_ids)
+        result = json.loads(content)['results']
+        for pull in pulls:
+            if pull in result.get('updated', []):
+                self.refresh_pull(pull)
+            else:
+                self.app.log.warn('Unable to mark pull read pull %s: %r' % (
+                    pull, result))
+
     def refresh_pull(self, pull_id, prefix='pull'):
         path = '/api/pulls/%d/get' % pull_id
         self.app.log.info('Sending request for: %r' % path)
