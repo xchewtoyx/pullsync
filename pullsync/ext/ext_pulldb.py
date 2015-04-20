@@ -162,7 +162,7 @@ class PullDB(handler.CementBaseHandler):
                     pull, result))
 
     def refresh_pull(self, pull_id, prefix='pull'):
-        path = '/api/pulls/%d/get' % pull_id
+        path = '/api/pulls/%d/get' % (int(pull_id),)
         self.app.log.info('Sending request for: %r' % path)
         resp, content = self.app.google.client.request(self.base_url + path)
         if resp.status != 200:
