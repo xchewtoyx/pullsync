@@ -152,6 +152,10 @@ class PullDB(handler.CementBaseHandler):
         result = json.loads(content)['results']
         for pull in pulls:
             if pull in result.get('updated', []):
+                self.app.log.debug('Pull marked read: %s' % pull)
+                self.refresh_pull(pull)
+            elif pull in result.get('skipped', []):
+                self.app.log.debug('Pull already read: %s' % pull)
                 self.refresh_pull(pull)
             else:
                 self.app.log.warn('Unable to mark pull read pull %s: %r' % (
