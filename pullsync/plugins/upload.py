@@ -21,7 +21,7 @@ class UploadController(controller.CementBaseController):
                 'action': 'store',
                 'required': True,
             }),
-            (['--threshold'], {
+            (['--threshold', '-t'], {
                 'help': 'Maximum safe Levenshtein distance',
                 'action': 'store',
                 'type': float,
@@ -31,7 +31,7 @@ class UploadController(controller.CementBaseController):
                 'help': 'Perform uploads for files that meet threshold',
                 'action': 'store_true',
             }),
-            (['--check_type'], {
+            (['--check_type', '-c'], {
                 'help': 'Check for new pulls, or cached unseen pulls',
                 'choices': ['new', 'unseen'],
                 'default': 'unseen'
