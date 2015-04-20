@@ -25,7 +25,7 @@ class UploadController(controller.CementBaseController):
                 'help': 'Maximum safe Levenshtein distance',
                 'action': 'store',
                 'type': float,
-                'default': 0.25,
+                'default': 0.2,
             }),
             (['--commit'], {
                 'help': 'Perform uploads for files that meet threshold',
