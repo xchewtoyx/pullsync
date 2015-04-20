@@ -91,7 +91,8 @@ class TodoController(controller.CementBaseController):
                     # TODO(rgh): should mark this as read
                     mark_read.append(pull_id)
                 handled.add(pull_id)
-        self.app.pulldb.pull_read(mark_read)
+        if mark_read:
+            self.app.pulldb.pull_read(mark_read)
 
     @controller.expose(help='reconcile current todo file with server data')
     def sync(self):
