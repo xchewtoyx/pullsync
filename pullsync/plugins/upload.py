@@ -102,7 +102,10 @@ class UploadController(controller.CementBaseController):
             good_match = bool(
                 best_match[1] < threshold and not best_match[0]
             )
-            self.app.log.debug('Match: %5r <%0.4f> [%s -> %s]' % (
+            logger = self.app.log.debug
+            if good_match:
+                logger = self.app.log.info
+            logger('Match: %5r <%0.4f> [%s -> %s]' % (
                 good_match,
                 best_match[1],
                 best_match[3][0],
