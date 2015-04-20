@@ -89,7 +89,7 @@ class TodoController(controller.CementBaseController):
                     continue
                 if pull_id in seen and entry[pull_id].startswith('x '):
                     # TODO(rgh): should mark this as read
-                    mark_read.append(pull_id)
+                    mark_read.append(int(pull_id))
                 handled.add(pull_id)
         self.app.pulldb.pull_read(mark_read)
 
