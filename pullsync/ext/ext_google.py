@@ -16,15 +16,16 @@ class GoogleHandler(handler.CementBaseHandler):
     class Meta:
         interface = AuthInterface
         label = 'google'
-        scope = (
-            'https://www.googleapis.com/auth/userinfo.email '
-            'https://www.googleapis.com/auth/devstorage.read_write '
-        )
+        scopes = [
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/devstorage.read_write',
+        ]
         user_agent = 'pullsync/0.1'
 
     def _setup(self, app):
         app.log.debug('Setting up google api client')
         super(GoogleHandler, self)._setup(app)
+        self.scopes = self.Meta.scopes
         self.app.extend('google', self)
         self._http = None
 
@@ -46,8 +47,9 @@ class GoogleHandler(handler.CementBaseHandler):
             storage_path,
             self.client_secrets['client_id'],
             self.Meta.user_agent,
-            self.Meta.scope
+            self.scopes
         )
+
 
     @property
     def client(self):
@@ -59,7 +61,7 @@ class GoogleHandler(handler.CementBaseHandler):
                 flow = client.OAuth2WebServerFlow(
                     client_id=self.client_secrets['client_id'],
                     client_secret=self.client_secrets['client_secret'],
-                    scope=self.Meta.scope,
+                    scope=self.scopes,
                     user_agent=self.Meta.user_agent,
                     redirect_url="urn:ietf:wg:oauth:2.0:oob",
                 )
@@ -68,10 +70,15 @@ class GoogleHandler(handler.CementBaseHandler):
             self._http = http_client
         return self._http
 
+    def add_scope(self, scope):
+        if scope not in self.scopes:
+            self.scopes.append(scope)
+            self._http = None
+
 
 def load_google_args(app):
     if not isinstance(app.args, argparse.ArgumentParser):
-        raise TypeError('Cannot add arguments no non argparse parser %r' % (
+        raise TypeError('Cannot add arguments to non argparse parser %r' % (
             app.args))
     app.args._add_container_actions(tools.argparser)
     app.args.set_defaults(noauth_local_webserver=True)
