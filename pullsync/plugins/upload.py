@@ -121,8 +121,11 @@ class UploadController(controller.CementBaseController):
         self.app.log.debug('Unseen pulls: %r' % pulls)
         for good_match, best_match, candidate in self.find_matches(
                 candidates, pulls, self.app.pargs.threshold):
-            if good_match and self.app.pargs.commit:
-                self.commit_file(best_match[2], candidate)
+            if good_match:
+                print('Found match: [%s -> %s] <%0.4f>' % (
+                    best_match[3][0], best_match[4][0], best_match[1]))
+                if self.app.pargs.commit:
+                    self.commit_file(best_match[2], candidate)
 
 
 def load(app=None):
