@@ -31,6 +31,7 @@ class MatchHandler(handler.CementBaseHandler):
         # Somtimes a random volume number slips in
         normal = re.sub(r'\bv\d+\b', '', normal)
         # Some substitutions for known bad nameing
+        normal = re.sub(r'the ', r' ', normal)
         normal = re.sub(r'2000ad', '2000 ad', normal)
         normal = re.sub(r'(abe sapien \d+) -.*', r'\g<1>', normal)
         normal = re.sub(r'(b.p.r.d. hell on earth \d+) -.*', r'\g<1>', normal)
@@ -38,9 +39,6 @@ class MatchHandler(handler.CementBaseHandler):
         normal = re.sub(r'garth ennis\'?', '', normal)
         normal = re.sub(r'george romero\'?s', '', normal)
         normal = re.sub(r'(outcast) by kirkman & azaceta', r'\g<1>', normal)
-        normal = re.sub(r'the blood queen', r'blood queen', normal)
-        normal = re.sub(r'the black bat', r'black bat', normal)
-        normal = re.sub(r'the devilers', r'devilers', normal)
         normal = re.sub(r'robin rises omega', r'robin rises', normal)
         normal = re.sub(r'^trinity of sin - the phantom stranger',
                         'the phantom stranger', normal)
