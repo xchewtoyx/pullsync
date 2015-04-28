@@ -50,9 +50,9 @@ class PullDB(handler.CementBaseHandler):
         while True:
             self.app.log.debug('fetching %s %r' % (path, position))
             result = self.fetch_page(path, cursor=position)
-            if not result['more']:
+            if not result['more_results']:
                 break
-            position = result.get('position')
+            position = result.get('next_page')
 
     def fetch_page(self, path, cursor=None, cache=True):
         if cursor:
@@ -82,9 +82,9 @@ class PullDB(handler.CementBaseHandler):
             results_page = self.fetch_page(path, cursor=position, cache=False)
             results.extend(
                 [result['pull'] for result in results_page['results']])
-            if not results_page['more']:
+            if not results_page['more_results']:
                 break
-            position = results_page.get('position')
+            position = results_page.get('next_page')
         return results
 
     def fetch_unread(self):
@@ -96,9 +96,9 @@ class PullDB(handler.CementBaseHandler):
             results_page = self.fetch_page(path, cursor=position)
             results.extend(
                 [result['pull'] for result in results_page['results']])
-            if not results_page['more']:
+            if not results_page['more_results']:
                 break
-            position = results_page.get('position')
+            position = results_page.get('next_page')
         return results
 
     def list_unread(self):
