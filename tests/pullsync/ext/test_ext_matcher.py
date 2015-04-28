@@ -40,7 +40,7 @@ class UploadPluginTest(test.CementTestCase):
         self.app.setup()
         self.assertEqual(
             self.app.match.normalise_name('The Walking Dead #012 (2014)'),
-            ('the walking dead #12', '12'),
+            ('walking dead #12', '12'),
         )
 
     def weighted_distance_test(self):
