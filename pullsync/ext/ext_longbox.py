@@ -35,6 +35,9 @@ class Longbox(controller.CementBaseController):
     class Meta:
         interface = interfaces.DataInterface
         label = 'longbox'
+        config_defaults = {
+            'bucket': 'long-box',
+            }
 
     def _setup(self, app):
         super(Longbox, self)._setup(app)
@@ -68,7 +71,9 @@ class Longbox(controller.CementBaseController):
         file_detail = self.file_detail(pull_id)
         if not file_detail:
             request = self.client.objects().list(
-                bucket='long-box', prefix=prefix)
+                bucket=self.app.config.get(
+                    self._meta.config_section, 'bucket'),
+                prefix=prefix)
             response = request.execute()
             if 'items' in response:
                 self.app.log.debug('Files found for prefix %s' % prefix)
