@@ -79,7 +79,8 @@ class UploadController(controller.CementBaseController):
             candidate[0], candidate[1]
         )
         pull_id = int(pull['identifier'])
-        destination = 'gs://long-box/comics/%02x/%02x/%x/' % (
+        destination = 'gs://%s/comics/%02x/%02x/%x/' % (
+            self.app.config.get('data.longbox', 'bucket'),
             pull_id & 0xff,
             (pull_id & 0xff00) >> 8,
             pull_id,
