@@ -6,7 +6,7 @@ from cement.core import handler, hook
 import httplib2
 from oauth2client import client
 from oauth2client import tools
-from oauth2client.multistore_file import get_credential_storage
+from oauth2client.contrib.multistore_file import get_credential_storage
 import xdg.BaseDirectory
 
 from pullsync.ext.interfaces import AuthInterface
