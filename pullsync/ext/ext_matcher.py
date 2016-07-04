@@ -30,6 +30,8 @@ class MatchHandler(handler.CementBaseHandler):
         normal = re.sub(r'\[[^)]+\]', '', normal)
         # Somtimes a random volume number slips in
         normal = re.sub(r'\bv\d+\b', '', normal)
+        # strip release annotations
+        normal = re.sub(r'\bc2c\b', '', normal)
         # Some substitutions for known bad nameing
         normal = re.sub(r'the ', r' ', normal)
         normal = re.sub(r'2000ad', '2000 ad', normal)
