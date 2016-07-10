@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "pullsync",
-    version = "0.0.3_pre2",
+    version = "0.0.3_pre3",
     packages = find_packages(),
     install_requires=[
         'cement',

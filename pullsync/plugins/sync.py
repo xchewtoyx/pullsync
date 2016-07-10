@@ -98,7 +98,7 @@ class SyncController(controller.CementBaseController):
                     pass
 
     def safe_name(self, name):
-        name = re.sub(r'/', '-', name)
+        name = re.sub(r'[/:]', '-', name)
         return name
 
     @controller.expose(hide=True)
